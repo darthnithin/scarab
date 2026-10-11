@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "description": "Full-length regression for 20 workload/input variants: 50M warmup and 10M measured instructions per trace, compared to existing CSE220 full campaign outputs.",
+  "cases": [
+    {
+      "name": "deepsjeng_r-50298",
+      "trace": "deepsjeng_r/50298.zip",
+      "source_size_bytes": 133392848,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "exchange2_r-30781",
+      "trace": "exchange2_r/30781.zip",
+      "source_size_bytes": 74223947,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r-17210",
+      "trace": "gcc_r/17210.zip",
+      "source_size_bytes": 106153039,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_2-20812",
+      "trace": "gcc_r_2/20812.zip",
+      "source_size_bytes": 117342875,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_3-2198",
+      "trace": "gcc_r_3/2198.zip",
+      "source_size_bytes": 62322932,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_4-7196",
+      "trace": "gcc_r_4/7196.zip",
+      "source_size_bytes": 46043938,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_5-2083",
+      "trace": "gcc_r_5/2083.zip",
+      "source_size_bytes": 105136432,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "leela_r-42427",
+      "trace": "leela_r/42427.zip",
+      "source_size_bytes": 95550008,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "mcf_r-93581",
+      "trace": "mcf_r/93581.zip",
+      "source_size_bytes": 37100891,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "omnetpp_r-2420",
+      "trace": "omnetpp_r/2420.zip",
+      "source_size_bytes": 164863964,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "perlbench_r-52790",
+      "trace": "perlbench_r/52790.zip",
+      "source_size_bytes": 47668770,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "perlbench_r_2-43154",
+      "trace": "perlbench_r_2/43154.zip",
+      "source_size_bytes": 45016646,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "perlbench_r_3-12723",
+      "trace": "perlbench_r_3/12723.zip",
+      "source_size_bytes": 50198611,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "x264_r-35371",
+      "trace": "x264_r/35371.zip",
+      "source_size_bytes": 73545342,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "x264_r_2-104659",
+      "trace": "x264_r_2/104659.zip",
+      "source_size_bytes": 73576210,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "x264_r_3-33181",
+      "trace": "x264_r_3/33181.zip",
+      "source_size_bytes": 68329142,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xalancbmk_r-14116",
+      "trace": "xalancbmk_r/14116.zip",
+      "source_size_bytes": 45096565,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xz_r-2726",
+      "trace": "xz_r/2726.zip",
+      "source_size_bytes": 51863807,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xz_r_2-2443",
+      "trace": "xz_r_2/2443.zip",
+      "source_size_bytes": 49797373,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xz_r_3-34685",
+      "trace": "xz_r_3/34685.zip",
+      "source_size_bytes": 60021305,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    }
+  ]
+}

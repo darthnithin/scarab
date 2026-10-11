@@ -104,15 +104,42 @@ under `fixtures/`, including its independent cache-replacement generator and
 the untouched global stream. The adjacent JSON records source hashes and the
 compute-node toolchain that generated the reference.
 
+## Full-length campaign regression
+
+`suite-full.json` runs the same 20 selected workload/input variants for the full
+50M warmup plus 10M measured instructions per SimPoint (1.2 billion total).
+Use the runner as above with this manifest and a fresh output directory.
+
+`import_lab_reference.py` verifies original CSE220 worker provenance, trace
+SHA-256, parameters, completion, and instruction counts, then copies the old
+results to a separate directory. The original lab files are never modified.
+Its sidecars explicitly say `imported_historical_run: true` and hash the original
+evidence; they do not claim that the parity runner performed those older runs.
+The selected MCF point predates worker JSON provenance, so its import verifies
+the original checksum file, hybrid controller state, and successful Slurm
+accounting instead.
+
+```sh
+python3 utils/native_port/import_lab_reference.py \
+  --lab-root /path/to/cse220 --manifest utils/native_port/suite-full.json \
+  --trace-root /path/to/traces --params src/PARAMS.golden_cove \
+  --output results/linux-full-reference
+python3 utils/native_port/parity.py compare-suite \
+  results/linux-full-reference results/macos-full \
+  --manifest utils/native_port/suite-full.json \
+  --require-provenance --report results/full-parity.json
+```
+
 ## Coverage boundaries
 
 The suite is broad real-workload regression, not an exhaustive x86 ISA proof.
 It does not prove every optional simulator feature, cache policy, DRAM type,
 multi-core configuration, REGDEPS/ARM trace format, or legacy Pin trace format.
 Raw/gzip/zip input transport should be checked independently on equivalent
-bytes. The existing 59 full 60M lab intervals provide a longer-duration gate
-and must be rerun on the native candidate before claiming that entire campaign
-matches. Reusing their measured outputs alone cannot prove a new binary.
+bytes. The full suite covers 20 of the existing 59 lab intervals. All 59 would
+need to be rerun on the native candidate before claiming that the entire
+original lab campaign matches. Reusing their measured outputs alone cannot
+prove a new binary.
 
 Pin execution-driven tracing, checkpoint restore, and Intel PT recording are
 separate from offline simulation. Passing this suite does not imply that native
