@@ -162,3 +162,31 @@ prove a new binary.
 Pin execution-driven tracing, checkpoint restore, and Intel PT recording are
 separate from offline simulation. Passing this suite does not imply that native
 ARM macOS can launch Linux/x86 workloads through Intel Pin.
+
+## Recorded acceptance results
+
+The October 11, 2026 acceptance run passed the following comparisons. Every row
+requires matching input provenance and compares text statistics, all Ramulator
+statistics, parameters and normalized logs in addition to the CSV fields shown.
+
+| Reference and candidate | Cases | Exact CSV fields |
+| --- | ---: | ---: |
+| Original Linux to native ARM64, short workloads | 22 | 558,932 |
+| Current-source Linux to native ARM64, including BRRIP | 23 | 584,338 |
+| Original Linux to current-source Linux, short workloads | 22 | 558,932 |
+| Historical Linux to native ARM64, 50M warmup + 10M measured | 20 | 508,120 |
+| Current-source Linux to native ARM64, x86 and REGDEPS fixtures | 6 | 152,436 |
+| Original Linux to native ARM64, x86 fixtures | 3 | 76,218 |
+
+The 20 full-length cases cover one selected interval from every workload/input
+variant, totaling 1.2 billion configured instructions. The native binary was
+Mach-O ARM64, SHA-256 `bafd019b7928dfe7a703158a9851e666de08da5420903d1aacbad2a23216623b`.
+The rebuilt Linux binary was ELF x86-64, SHA-256
+`6d2f040fd06fcec72193a5123d9289614961e0051260dd8fc5b52484d3698e8b`.
+
+[`validation-2026-10-11.json`](validation-2026-10-11.json) records the per-case
+results, binary/input/manifest/report hashes, and comparison boundaries. These
+results describe those immutable binaries, rather than guaranteeing future
+source changes. The raw reports and licensed traces remain outside Git; the
+commands above reproduce the checks when those inputs are available. The
+original BRRIP hang remains the explicit exception to the legacy-oracle matrix.
