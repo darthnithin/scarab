@@ -60,9 +60,11 @@ static inline void record_free_list_chunk(List* list, void* chunk_base);
 /* init_list: */
 
 /* Lists that are part of a larger object do not need one. */
+#ifndef NO_DEBUG
 static inline const char* list_name(const List* list) {
   return list->name ? list->name : "unnamed";
 }
+#endif
 
 void init_list(List* list, char name[], uns data_size, Flag use_free_list) {
   DEBUGU(0, "Initializing list called '%s'.\n", name ? name : "unnamed");

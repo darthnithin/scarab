@@ -26,6 +26,8 @@
  * Description  : This is a library of cache functions.
  ***************************************************************************************/
 
+#include "libs/scarab_random.h"
+
 #include "libs/cache_lib.h"
 
 #include <stdlib.h>
@@ -68,7 +70,6 @@ static inline void invalidate_unsure_line(Cache*, uns, Addr);
 /**************************************************************************************/
 /* Global Variables */
 
-char rand_repl_state[31];
 
 /**************************************************************************************/
 
@@ -672,9 +673,7 @@ static inline void update_repl_policy(Cache* cache, Cache_Entry* cur_entry, uns 
       cur_entry->last_access_time = sim_time;
       break;
     case REPL_RANDOM: {
-      char* old_rand_state = (char*)setstate(rand_repl_state);
-      cache->repl_ctrs[set] = rand() % cache->assoc;
-      setstate(old_rand_state);
+      cache->repl_ctrs[set] = scarab_rand_replacement() % cache->assoc;
     } break;
     case REPL_NOT_MRU:
       if (way == cache->repl_ctrs[set])
@@ -1040,7 +1039,7 @@ Addr get_cache_line_addr(Cache* cache, Addr addr) {
 
 void* cache_insert_lru(Cache* cache, uns8 proc_id, Addr addr, Addr* line_addr, Addr* repl_line_addr) {
   Addr tag, tag_full;
-  uns repl_index;
+  uns repl_index = 0; /* Ignored by REPL_IDEAL, which has no replacement way. */
   uns set = cache_index(cache, addr, &tag, &tag_full, line_addr);
   Cache_Entry* new_line;
 
@@ -1399,6 +1398,10 @@ void general_action_init(Cache* cache, const char* name, uns cache_size, uns ass
   cache->set_mask = N_BIT_MASK(LOG2(num_sets));       /* use after shifting */
   cache->tag_mask = ~cache->set_mask;                 /* use after shifting */
   cache->offset_mask = N_BIT_MASK(cache->shift_bits); /* use before shifting */
+  /* Strategy caches also pass through cache_index's tag folding. A zero
+   * tag_bits value leaves that loop shifting by zero forever. */
+  cache->tag_bits = 64;
+  cache->tag_pure_mask = N_BIT_MASK_64;
 
   /* allocate memory for all the sets (pointers to line arrays)  */
   cache->entries = (Cache_Entry**)malloc(sizeof(Cache_Entry*) * num_sets);
@@ -1622,7 +1625,7 @@ void brrip_action_init(Cache* cache, const char* name, uns cache_size, uns assoc
   cache->bimodal_count = 0;
 
   // Pseudo-Random Impl
-  srand(BRRIP_BIMODAL_SRAND_NUM);
+  scarab_srand(BRRIP_BIMODAL_SRAND_NUM);
 }
 
 void brrip_update_insert(Cache* cache, uns8 proc_id, uns set, uns way, void* arg) {
@@ -1636,7 +1639,7 @@ void brrip_update_insert(Cache* cache, uns8 proc_id, uns set, uns way, void* arg
   */
 
   // Pseudo-Random Impl
-  bimodal_para = rand() % BRRIP_BIMODAL_PARA <= BRRIP_BIMODAL_PARA - 2 ? TRUE : FALSE;
+  bimodal_para = scarab_rand() % BRRIP_BIMODAL_PARA <= BRRIP_BIMODAL_PARA - 2 ? TRUE : FALSE;
 
   if (bimodal_para) {
     // insertion in distant future

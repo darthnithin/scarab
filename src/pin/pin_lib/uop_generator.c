@@ -26,6 +26,8 @@
  ** Description  : API to extract uops out of ctype_pin_inst_struct instances.
  ****************************************************************************************/
 
+#include <inttypes.h>
+
 #include "uop_generator.h"
 
 #include "globals/assert.h"
@@ -138,7 +140,7 @@ static void convert_dyn_uop(uns8 proc_id, Inst_Info* info, ctype_pin_inst* pi, T
 static void print_inst_fields(uns proc_id, compressed_op* cop) {
   if (DEBUG_INST_FIELDS && DEBUG_RANGE_COND(proc_id)) {
     DEBUG_PRINT(proc_id, "=========== Compressed Op Information ===============\n");
-    DEBUG_PRINT(proc_id, "DEBUG_INST_FIELDS inst addrs fake: %lx %lx %d %d\n", cop->instruction_addr,
+    DEBUG_PRINT(proc_id, "DEBUG_INST_FIELDS inst addrs fake: %" PRIx64 " %" PRIx64 " %d %d\n", cop->instruction_addr,
                 cop->instruction_next_addr, cop->fake_inst, cop->fake_inst_reason);
     DEBUG_PRINT(proc_id, "DEBUG_INST_FIELDS op: %s\n", cop->pin_iclass);
     DEBUG_PRINT(proc_id, "DEBUG_INST_FIELDS size op cf fp: %d %d %d %d %d\n", cop->size, cop->op_type, cop->cf_type,
@@ -172,12 +174,12 @@ static void print_inst_fields(uns proc_id, compressed_op* cop) {
                 cop->is_simd ? cop->lane_width_bytes : 0);
     DEBUG_PRINT(proc_id, "DEBUG_INST_FIELDS ld addrs:");
     for (int i = 0; i < cop->num_ld; ++i) {
-      DEBUG_PRINT(proc_id, "%lx ", cop->ld_vaddr[i]);
+      DEBUG_PRINT(proc_id, "%" PRIx64 " ", cop->ld_vaddr[i]);
     }
     DEBUG_PRINT(proc_id, "\n");
     DEBUG_PRINT(proc_id, "DEBUG_INST_FIELDS st addrs:");
     for (int i = 0; i < cop->num_st; ++i) {
-      DEBUG_PRINT(proc_id, "%lx ", cop->st_vaddr[i]);
+      DEBUG_PRINT(proc_id, "%" PRIx64 " ", cop->st_vaddr[i]);
     }
     DEBUG_PRINT(proc_id, "\n");
     DEBUG_PRINT(proc_id, "DEBUG_INST_FIELDS ld st size: %d %d\n", cop->ld_size, cop->st_size);

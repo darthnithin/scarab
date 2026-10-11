@@ -27,6 +27,8 @@
  ***************************************************************************************/
 /*** CMP  remov all the wrong path stuff  ***/
 
+#include "libs/scarab_random.h"
+
 #include "memory.h"
 
 #include <limits.h>
@@ -195,7 +197,7 @@ static inline void init_mem_queue(Mem_Queue* queue, char* name, uns size, Mem_Qu
 
 static void print_mem_queue_generic(Mem_Queue* queue);
 
-static inline void queue_sanity_check(int location);
+static inline void __attribute__((unused)) queue_sanity_check(int location);
 
 void mem_insert_req_round_robin(void);
 
@@ -2478,7 +2480,7 @@ static inline Mem_Req* mem_search_queue(
     src_addr = CACHE_SIZE_ADDR(req->size, addr);
     match = FALSE;
 
-    if ((dest_addr == src_addr) /* && !is_final_state(req->state)*/) { /* address match */
+    if (dest_addr == src_addr /* && !is_final_state(req->state)*/) { /* address match */
       ASSERTM(proc_id, proc_id == get_proc_id_from_cmp_addr(addr), "Proc ID does not match proc ID in address!\n");
       ASSERTM(proc_id, req->proc_id == get_proc_id_from_cmp_addr(req->addr),
               "Proc ID does not match proc ID in address!\n");
@@ -2935,7 +2937,7 @@ static void mem_init_new_req(Mem_Req* new_req, Mem_Req_Type type, Mem_Queue_Type
   new_req->phys_addr = addr_translate(addr);
 
   if (MEMORY_RANDOM_ADDR)
-    new_req->phys_addr = convert_to_cmp_addr(proc_id, rand() * VA_PAGE_SIZE_BYTES);
+    new_req->phys_addr = convert_to_cmp_addr(proc_id, scarab_rand() * VA_PAGE_SIZE_BYTES);
   new_req->priority = new_priority;
   new_req->size = size;
   ASSERT(new_req->proc_id, new_req->size <= VA_PAGE_SIZE_BYTES);

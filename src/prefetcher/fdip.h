@@ -54,7 +54,7 @@ void inc_off_fetched_cls(Addr line_addr);
 void add_evict_seq(Addr line_addr);
 void evict_prefetched_cls(Addr line_addr, Flag by_fdip);
 uns get_miss_reason(Addr line_addr);
-uns get_last_miss_reason();
+uns get_last_miss_reason(void);
 void set_last_miss_reason(uns reason);
 void update_useful_lines_uc(Addr line_addr);
 void update_unuseful_lines_uc(Addr line_addr);

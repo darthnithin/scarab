@@ -43,7 +43,6 @@
 #include "table_info.h"
 
 // forward declaration of FT
-typedef struct FT FT;
 
 /* All per-op pipeline cycle counters live in one struct on the Op. Each counter
  * is read through op_get_<name>_cycle() and written through op_set_<name>_cycle()

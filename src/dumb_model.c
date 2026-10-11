@@ -27,6 +27,8 @@
  *                generated memory requests (no core modeling)
  ***************************************************************************************/
 
+#include "libs/scarab_random.h"
+
 #include "dumb_model.h"
 
 #include <unistd.h>
@@ -85,14 +87,14 @@ void dumb_init(uns mode) {
   if (DUMB_MODEL_RANDOMIZE_DISTANCE) {
     int seed = getpid();
     MESSAGEU(0, "Seed: %d\n", seed);
-    srand(seed);
+    scarab_srand(seed);
   }
   for (uns proc_id = 0; proc_id < NUM_CORES; proc_id++) {
     Proc_Info* info = &infos[proc_id];
     info->dumb = SIM_MODEL == DUMB_MODEL || proc_id != DUMB_CORE;
     info->avg_req_distance = DUMB_MODEL_AVG_REQ_DISTANCE;
     if (DUMB_MODEL_RANDOMIZE_DISTANCE) {
-      info->avg_req_distance = (rand() % 200) + 40;
+      info->avg_req_distance = (scarab_rand() % 200) + 40;
       MESSAGEU(proc_id, "Distance: %d\n", info->avg_req_distance);
     } else if (DUMB_MODEL_AVG_REQ_DISTANCE_PER_CORE) {
       int* distances = malloc(NUM_CORES * sizeof(uns));
@@ -170,7 +172,7 @@ void dumb_cycle() {
       continue;
     STAT_EVENT(proc_id, NODE_CYCLE);
     Proc_Info* info = &infos[proc_id];
-    Flag send_req = info->retry || (info->reqs_out < info->mlp && (rand() % info->avg_req_distance) == 0);
+    Flag send_req = info->retry || (info->reqs_out < info->mlp && (scarab_rand() % info->avg_req_distance) == 0);
     if (info->retry || info->reqs_out == info->mlp) {
       STAT_EVENT(proc_id, FULL_WINDOW_STALL);
     }
@@ -180,8 +182,8 @@ void dumb_cycle() {
       if (info->retry) {
         addr = info->last_addr;
       } else {
-        addr = convert_to_cmp_addr(proc_id, rand() * L1_LINE_SIZE);
-        if (rand() % info->avg_row_hits != 0) {
+        addr = convert_to_cmp_addr(proc_id, scarab_rand() * L1_LINE_SIZE);
+        if (scarab_rand() % info->avg_row_hits != 0) {
           // make row hit
           uns64 page_num = info->last_addr & page_num_mask;
           uns64 page_offset = addr & ~page_num_mask;

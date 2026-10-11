@@ -87,7 +87,7 @@ typedef enum FT_Arbitration_Result_enum {
   FT_HIT_UOP_CACHE
 } FT_Arbitration_Result;
 
-typedef struct Icache_Stage_struct {
+struct Icache_Stage_struct {
   uns8 proc_id;
   /* two data paths: */
   /* uops fetched from uop cache go to uopc_sd, otherwise sd */
@@ -117,7 +117,7 @@ typedef struct Icache_Stage_struct {
   Cache icache_line_info; /* contains info about the icache lines */
   Cache pref_icache;      /* Prefetcher cache storage structure (caches Inst_Info *) */
   char rand_wb_state[31]; /* State of random number generator for random writeback */
-} Icache_Stage;
+};
 
 typedef struct Icache_Data_struct {
   Flag fetched_by_offpath;   /* fetched by an off_path op? */

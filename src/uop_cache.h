@@ -14,9 +14,6 @@
 #include "op.h"
 #include "stage_data.h"
 
-// Forward declarations to avoid circular dependencies
-typedef struct FT FT;
-
 #ifdef __cplusplus
 extern "C" {
 #endif

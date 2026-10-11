@@ -22,6 +22,8 @@
 #ifndef __MEMORY_H
 #define __MEMORY_H
 
+#include "../libs/scarab_random.h"
+
 #include "Config.h"
 #include "DRAM.h"
 #include "Request.h"
@@ -510,10 +512,10 @@ private:
     }
     long lrand(void) {
         if(sizeof(int) < sizeof(long)) {
-            return static_cast<long>(rand()) << (sizeof(int) * 8) | rand();
+            return static_cast<long>(scarab_rand()) << (sizeof(int) * 8) | scarab_rand();
         }
 
-        return rand();
+        return scarab_rand();
     }
 };
 

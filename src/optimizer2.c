@@ -394,14 +394,20 @@ Flag opt2_is_leader(void) {
 }
 
 void decouple_open_files(void) {
-  const uns MAX_FDS = 1024;
+  enum { MAX_FDS = 1024 };
   uns fds[MAX_FDS];
   uns num_fds = 0;
 
   char fdinfo_path[MAX_STR_LENGTH + 1];
+#ifdef __APPLE__
+  /* Darwin exposes the descriptor directory through devfs, not procfs. */
+  uns len = snprintf(fdinfo_path, MAX_STR_LENGTH, "/dev/fd");
+#else
   uns len = snprintf(fdinfo_path, MAX_STR_LENGTH, "/proc/%d/fdinfo", getpid());
+#endif
   ASSERT(0, len < MAX_STR_LENGTH);
   DIR* dir = opendir(fdinfo_path);
+  ASSERT(0, dir != NULL);
 
   while (dir) {
     struct dirent* entry = readdir(dir);
@@ -424,13 +430,23 @@ void decouple_open_files(void) {
       int fd = fds[i];
       if (fd <= 2)
         continue;  // do not decouple standard input/output/error
+      char path[MAX_STR_LENGTH + 1];
+#ifdef __APPLE__
+      struct stat status;
+      ASSERT(0, fstat(fd, &status) == 0);
+      /* Pipes/sockets communicate with the optimizer master and must retain
+       * their shared open-file descriptions across fork. */
+      if (!S_ISREG(status.st_mode))
+        continue;
+      ASSERT(0, fcntl(fd, F_GETPATH, path) != -1);
+#else
       char fd_path[MAX_STR_LENGTH + 1];
       uns len = snprintf(fd_path, MAX_STR_LENGTH, "/proc/%d/fd/%d", getpid(), fd);
       ASSERT(0, len < MAX_STR_LENGTH);
-      char path[MAX_STR_LENGTH + 1];
       uns path_len = readlink(fd_path, path, MAX_STR_LENGTH);
       ASSERT(0, path_len < MAX_STR_LENGTH);
       path[path_len] = 0;  // null terminator
+#endif
       int64 offset = lseek(fd, 0, SEEK_CUR);
       int flags =
           fcntl(fd, F_GETFL, 0) & ~O_CREAT & ~O_EXCL & ~O_NOCTTY & ~O_TRUNC;  // clear file creation flags for safety
@@ -444,7 +460,7 @@ void decouple_open_files(void) {
         int close_rc = close(open_fd);
         ASSERT(0, close_rc == 0);
       }
-      int ret_offset = lseek(fd, offset, SEEK_SET);
+      off_t ret_offset = lseek(fd, offset, SEEK_SET);
       ASSERT(0, ret_offset == offset);
     } else {
       ASSERT(0, errno == EBADF);

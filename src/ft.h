@@ -38,8 +38,7 @@ extern "C" {
 #include "ft_info.h"
 #include "op.h"
 
-// Forward declare FT as an opaque struct for C
-typedef struct FT FT;
+// FT is declared in globals/global_types.h (included by op.h).
 
 enum FT_Event {
   FT_EVENT_NONE,
@@ -97,7 +96,7 @@ inline bool operator<(const FT_Info_Static& a, const FT_Info_Static& b) {
 }
 
 // C++ definition. Declared as `struct` to match the C-visible
-// `typedef struct FT FT;` forward declaration above; semantically identical
+// forward declaration in globals/global_types.h; semantically identical
 // to `class` since the definition uses explicit access specifiers.
 struct FT {
  public:

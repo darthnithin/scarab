@@ -28,6 +28,8 @@
  *      Author: kevincha
  */
 
+#include "../libs/scarab_random.h"
+
 #include <stdlib.h>
 
 #include "Refresh.h"
@@ -84,7 +86,7 @@ void Refresh<DSARP>::early_inject_refresh() {
   // Try to pick an idle bank to refresh per rank
   for (int r = 0; r < max_rank_count; r++) {
     // Randomly pick a bank to examine
-    int bidx_start = rand() % max_bank_count;
+    int bidx_start = scarab_rand() % max_bank_count;
 
     for (int b = 0; b < max_bank_count; b++)
     {
@@ -230,7 +232,7 @@ void Refresh<DSARP>::wrp() {
     }
 
     // Select a bank to ref
-    int ref_bid_idx = (top_idle_idx == 0) ? 0 : rand() % top_idle_idx;
+    int ref_bid_idx = (top_idle_idx == 0) ? 0 : scarab_rand() % top_idle_idx;
     int ref_bid = sorted_bank_demand[ref_bid_idx].second;
 
     // Make sure we don't exceed the credit

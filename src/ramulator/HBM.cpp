@@ -112,7 +112,7 @@ void HBM::update_params(const Config& configs) {
 
     speed_entry.nRC = speed_entry.nRAS + speed_entry.nRP;
     
-    org_entry.size = (ulong(org_entry.count[int(Level::BankGroup)])*
+    org_entry.size = (static_cast<unsigned long>(org_entry.count[int(Level::BankGroup)])*
                         org_entry.count[int(Level::Bank)]*org_entry.count[int(Level::Row)]*
                         org_entry.count[int(Level::Column)]*
                         org_entry.dq)/(1024*1024); // calculating in MegaBits

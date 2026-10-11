@@ -19,6 +19,8 @@
 #ifndef INCLUDE_BLOOM_FILTER_HPP
 #define INCLUDE_BLOOM_FILTER_HPP
 
+#include "libs/scarab_random.h"
+
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
@@ -532,11 +534,11 @@ protected:
       {
          std::copy(predef_salt, predef_salt + predef_salt_count, std::back_inserter(salt_));
 
-         srand(static_cast<unsigned int>(random_seed_));
+         scarab_srand(static_cast<unsigned int>(random_seed_));
 
          while (salt_.size() < salt_count_)
          {
-            bloom_type current_salt = static_cast<bloom_type>(rand()) * static_cast<bloom_type>(rand());
+            bloom_type current_salt = static_cast<bloom_type>(scarab_rand()) * static_cast<bloom_type>(scarab_rand());
 
             if (0 == current_salt)
                continue;

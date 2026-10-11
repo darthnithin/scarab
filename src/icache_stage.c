@@ -574,7 +574,7 @@ Icache_State icache_wait_for_miss_actions(Break_Reason* break_fetch) {
   ASSERT(ic->proc_id, ft_op_buffer_can_fetch_op(ic));
   DEBUG(ic->proc_id, "Ifetch barrier: Waiting for miss \n");
   if (!ic->off_path) {
-    INC_STAT_EVENT(ic->proc_id, INST_LOST_WAIT_FOR_ICACHE_MISS_NOT_PREFETCHED + get_last_miss_reason(ic->proc_id),
+    INC_STAT_EVENT(ic->proc_id, INST_LOST_WAIT_FOR_ICACHE_MISS_NOT_PREFETCHED + get_last_miss_reason(),
                    ic->sd.max_op_count);
   }
   *break_fetch = BREAK_ICACHE_WAIT_FOR_MISS;

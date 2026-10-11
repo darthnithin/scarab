@@ -5,9 +5,6 @@
 
 #include "op.h"
 
-typedef struct FT FT;
-typedef struct Icache_Stage_struct Icache_Stage;
-
 #ifdef __cplusplus
 extern "C" {
 #endif

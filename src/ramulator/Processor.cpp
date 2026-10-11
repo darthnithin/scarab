@@ -426,7 +426,6 @@ bool Trace::get_filtered_request(long& bubble_cnt, long& req_addr, Request::Type
 {
     static bool has_write = false;
     static long write_addr;
-    static int line_num = 0;
     if (has_write){
         bubble_cnt = 0;
         req_addr = write_addr;
@@ -436,11 +435,9 @@ bool Trace::get_filtered_request(long& bubble_cnt, long& req_addr, Request::Type
     }
     string line;
     getline(file, line);
-    line_num ++;
     if (file.eof() || line.size() == 0) {
         file.clear();
         file.seekg(0, file.beg);
-        line_num = 0;
 
         if(expected_limit_insts == 0) {
             has_write = false;
@@ -448,7 +445,6 @@ bool Trace::get_filtered_request(long& bubble_cnt, long& req_addr, Request::Type
         }
         else { // starting over the input trace file
             getline(file, line);
-            line_num++;
         }
     }
 

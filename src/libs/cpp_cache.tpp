@@ -1,5 +1,7 @@
 // CPP implementation of a cache.
 
+#include "libs/scarab_random.h"
+
 #include <iostream>
 #include <limits>
 #include <list>
@@ -149,9 +151,9 @@ uns Cpp_Cache<User_Key_Type, User_Data_Type>::get_victim_idx_by_policy(Set<User_
       }
       
       if (!valid_indices.empty()) {
-        repl_idx = valid_indices[rand() % valid_indices.size()];
+        repl_idx = valid_indices[scarab_rand() % valid_indices.size()];
       } else {
-        repl_idx = rand() % assoc; // Fallback if no valid entries
+        repl_idx = scarab_rand() % assoc; // Fallback if no valid entries
       }
     } break;
     case REPL_ROUND_ROBIN: {

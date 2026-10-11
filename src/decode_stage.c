@@ -287,7 +287,7 @@ void decode_stage_process_op(Op* op) {
 }
 
 // UNUSED, and not kept up to date with uop cache changes.
-static inline void update_cycles_stats(Stage_Data* src_sd, int empty_stage_idx) {
+static inline void __attribute__((unused)) update_cycles_stats(Stage_Data* src_sd, int empty_stage_idx) {
   static Op* last_op = NULL;  // The most recent op that has entered the decode stage.
 
   int decode_stages_empty = STAGE_MAX_DEPTH - empty_stage_idx;

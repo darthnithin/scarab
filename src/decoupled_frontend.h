@@ -140,7 +140,6 @@ typedef enum BpId_enum {
   ALT_BP_4,
 } BpId;
 
-typedef struct FT FT;
 typedef struct Decoupled_FE Decoupled_FE;
 
 typedef struct decoupled_fe_iter decoupled_fe_iter;
@@ -223,8 +222,8 @@ uint64_t lookahead_buffer_count(uns proc_id);
 
 #include "confidence/conf.hpp"
 
-// Note: FT and Decoupled_FE are both forward-declared in the C-visible section
-// above via `typedef struct FT FT;` / `typedef struct Decoupled_FE Decoupled_FE;`.
+// FT is forward-declared in globals/global_types.h, and Decoupled_FE in the
+// C-visible section above.
 // We keep the `struct` tag here to match (C++ struct and class differ only in
 // default access, and both definitions use explicit `public:`).
 struct FT;

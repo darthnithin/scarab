@@ -107,7 +107,7 @@ static inline void reg_file_debug_print_entry(struct reg_table_entry *entry, int
   printf("read: %d, consume: %d\n", entry->onpath_consumers_num, entry->onpath_consumed_count);
 }
 
-static inline void reg_file_debug_print_op(Op *op, int state) {
+static inline void __attribute__((unused)) reg_file_debug_print_op(Op *op, int state) {
   ASSERT(op->proc_id, op != NULL);
   if (op->uop->num_dest_regs == 0)
     return;
@@ -143,7 +143,7 @@ static inline void reg_file_debug_print_op(Op *op, int state) {
   printf(">\n");
 }
 
-static inline void reg_file_debug_print_table(uns reg_table_type) {
+static inline void __attribute__((unused)) reg_file_debug_print_table(uns reg_table_type) {
   for (uns ii = 0; ii < REG_FILE_REG_TYPE_NUM; ii++) {
     printf("\n");
     printf("Table Type: %d; Reg Type: %d\n", reg_table_type, ii);

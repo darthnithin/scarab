@@ -83,6 +83,7 @@ class Flags {
 
 class StatBase {
  public:
+  virtual ~StatBase() = default;
     StatBase() {
         all_stats.push_back(this);
     }

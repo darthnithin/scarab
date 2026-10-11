@@ -29,6 +29,7 @@
 #include "power/power_scarab_config.h"
 
 #include <assert.h>
+#include <inttypes.h>
 #include <cmath>
 #include <fstream>
 #include <iomanip>
@@ -864,7 +865,7 @@ void power_print_memory_parts(std::ofstream& out) {
 
   uint64_t CHIP_SIZE_IN_BYTES = uint64_t(ramulator_get_chip_size()) * 1024 * 1024 / 8;  // Convert MBits to Bytes
   ASSERTM(0, CHIP_SIZE_IN_BYTES != 0 && CHIP_SIZE_IN_BYTES <= (1 << 30),
-          "chip_size(%lu) is either zero or too large to represent in a 32-bit int\n", CHIP_SIZE_IN_BYTES);
+          "chip_size(%" PRIu64 ") is either zero or too large to represent in a 32-bit int\n", CHIP_SIZE_IN_BYTES);
   ADD_CACTI_PARAM(out, "size (bytes)", CHIP_SIZE_IN_BYTES, );
 
   ADD_CACTI_PARAM(out, "block size (bytes)", L1_LINE_SIZE, );

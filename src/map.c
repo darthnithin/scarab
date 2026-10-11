@@ -119,7 +119,7 @@ static inline void update_map(Op*);
 static inline void expand_wake_up_entries(void);
 static inline void update_store_hash(Op* op);
 static inline Op* add_store_deps(Op* op);
-static inline void update_map_entry(Op* op, Map_Entry* map_entry);
+static inline void __attribute__((unused)) update_map_entry(Op* op, Map_Entry* map_entry);
 static inline void recover_mem_map_entry(void* hash_entry, void* arg);
 
 /* memory map hash traversal */

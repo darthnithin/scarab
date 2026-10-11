@@ -143,7 +143,7 @@ private:
     typedef list<Request>::iterator ReqIter;
     function<ReqIter(ReqIter, ReqIter)> compare[int(Policy::MAX)] = {
         // FCFS
-        [this] (ReqIter req1, ReqIter req2) {
+        [] (ReqIter req1, ReqIter req2) {
             if (req1->arrive <= req2->arrive) return req1;
             return req2;},
 
@@ -231,7 +231,7 @@ private:
             return vector<int>();},
 
         // Opened
-        [this] (typename T::Command cmd) {
+        [] (typename T::Command cmd) {
             return vector<int>();},
 
         // Timeout
