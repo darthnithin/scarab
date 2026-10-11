@@ -32,6 +32,6 @@
 /* version */
 const char* version(void) {
   return
-#include "gitrev"
+#include <gitrev>
       ;
 }
