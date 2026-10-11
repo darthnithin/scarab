@@ -1,0 +1,16 @@
+{
+  "description": "Hashes from actual Linux glibc rand(), compared to Scarab PRNG on ARM64 macOS",
+  "cluster": "UCSC Hummingbird",
+  "slurm_job": "804241",
+  "node": "node-25",
+  "glibc": "2.34",
+  "glibc_package_read_on_cluster_login": "glibc-2.34-275.el9_8.x86_64",
+  "compute_platform": "Linux-5.14.0-687.39.1.el9_8.x86_64-x86_64-with-glibc2.34",
+  "compile_command": "cc -D_DEFAULT_SOURCE -DUSE_HOST_LIBC -std=c99 random_probe.c -o random-glibc-probe",
+  "run_command": "./random-glibc-probe",
+  "probe_source_sha256": "5495ea80231d997401f4b7697d74f859ed83e9d7575a6817b51ab08e4dc987a6",
+  "fixture_sha256": "5e2db0c6eee7f58e0fac60ae9e61e71a30c0c61933dbc7649df1eb50ab877f52",
+  "samples": 1400000,
+  "algorithm": "FNV-1a over explicit low-to-high bytes of every generated uint32_t",
+  "compiler": "GCC 11.5.0 20240719 (Red Hat 11.5.0-14)"
+}
