@@ -190,3 +190,31 @@ results describe those immutable binaries, rather than guaranteeing future
 source changes. The raw reports and licensed traces remain outside Git; the
 commands above reproduce the checks when those inputs are available. The
 original BRRIP hang remains the explicit exception to the legacy-oracle matrix.
+
+## Live execution acceptance
+
+`execution_parity.py` adds a separate provenance gate for `pin_exec_driven`
+results. It requires `execution-run.json` on both sides and matches program,
+Pin-tool and parameter hashes, simulator arguments, canonical Pin options and
+program arguments. Both Scarab and Pin must exit successfully; SSH-relay records
+also require relay exit zero and the helper hash. Imported manual records must
+be labeled and bind their saved artifacts by hash. No trace sidecars are needed.
+
+```sh
+python3 utils/native_port/execution_parity.py \
+  results/linux-pin-natural-exit results/macos-pin-natural-exit \
+  --report results/pin-natural-exit-audited.json
+```
+
+Two live single-core `simple_loop` cases passed on October 11, 2026: natural
+exit (70 instructions, 305 cycles) and a 20-instruction limit (248 cycles).
+Each matched **12,703 exact CSV fields** plus complete text/Ramulator statistics,
+parameters and normalized logs. The tested final native binary also passed MCF,
+RANDOM and BRRIP trace smoke cases (76,218 fields).
+
+[`execution-validation-2026-10-11.json`](execution-validation-2026-10-11.json)
+preserves hashes, observed revision labels and the explicitly imported native
+run records. This establishes initial Linux-Pin/native-Mac execution for that
+program and those stopping conditions. It does not establish general program,
+multicore, checkpoint, Intel PT, or native ARM64 Pin support. See
+[`docs/remote-pin.md`](../../docs/remote-pin.md) for the launcher.

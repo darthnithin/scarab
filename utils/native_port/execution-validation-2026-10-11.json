@@ -1,0 +1,342 @@
+{
+  "cases": [
+    {
+      "byte_identical": false,
+      "candidate_record": {
+        "artifact_sha256": {
+          "PARAMS.in": "9194a20aefaaa01b91d10cc3d590693b04d508abbff4d649af212d6638c223e2",
+          "PARAMS.out": "033cf12af4eb6b5e1c9dceed8ec690227ccbc06383ff16b3bbe3cc37f829af03",
+          "bp.stat.0.csv": "3c711d115d0b0c65c5f776ac7ec811b2b33b090b99652ff857fbb92e0fb254d5",
+          "bp.stat.0.out": "fe78438992b299a1b1bbe4b15bbdc186dc31c8a706938a2c5d75ffbf656200a5",
+          "core.stat.0.csv": "70beccdbfa97c43252d186613d8dc85fd9a9a8547d51b2620c40c5b86dd976c9",
+          "core.stat.0.out": "bd927f526a9003b3b2dc2620b7e752c0f73a2ac5bb78e35bd023704d46868d5e",
+          "fetch.stat.0.csv": "1072c366fcd5b9c7d702e42480db4c052f61bb0cac4ab7547abfad3be7f22bb5",
+          "fetch.stat.0.out": "b77308126c6aaf563109db1a48a39d00f997f94b286da6838cd93f1fda1590dd",
+          "inst.stat.0.csv": "1e0fd4ff8cc9e76beb2fa5163a6947f2d4f2c1b6ff5c10a539114237fb2f6210",
+          "inst.stat.0.out": "4f44ad1694a289aac498783266ce39105e045f9fdd0e73dc1df420a17689e6bc",
+          "l2l1pref.stat.0.csv": "d3a02f71d34384a3efb6a2e6521bb1fd9de26c00dfe60386ccbc0187c3e67f9d",
+          "l2l1pref.stat.0.out": "e2be7ca894a85d261c747e74d700a851d219146579ed7ea1f684cd755ccf117b",
+          "memory.stat.0.csv": "18c9eb11a74418b21b173174a2e83f69f1a30ae19209ad6809f2b3ce188253c3",
+          "memory.stat.0.out": "fc94dde3a4926cfe53425344784b6dc384bc481ec3146caecfd823d332aba374",
+          "power.stat.0.csv": "37138a776d0f9c1bc353b778c86ad11657952d821bf5fcda78132a014f7f6c49",
+          "power.stat.0.out": "c3d5597f674208d8f0d5eb929467185cb328cc642683edf20721bfbd377bcd8a",
+          "pref.stat.0.csv": "e561b1f3d62afcd62506d68681e5c6320a0c12e2f9b1b1b9f7170284974ba7f2",
+          "pref.stat.0.out": "6d280dc57a3f401b167efe87d351b22567cdb3fc0f0e58768a3bc6f9d73b4765",
+          "ramulator.stat.out": "81ec1c165c919662c2866c1bf05e29635499521cbecf3858548a18a6d704bbda",
+          "relay.log": "89179c09922f20a23435669d325696aee0822d94caf38e794ec51b85fd409326",
+          "sim.log": "05572a28b7af076fb243ddc91dcf7e8965164f5844f87e99cbfc070a70c47f4a",
+          "stream.stat.0.csv": "84bf655bd876c589ac2b52102eafcd5b6496fcfbef168271707135e50357b524",
+          "stream.stat.0.out": "5d5b573b947d583efd7e5f8e21a4f43466c863622ca034ceed86944d863a39f1"
+        },
+        "binary_format": "/Users/nithin/dev/scarab/build/parity-binaries/scarab-arm64-pin-final: Mach-O 64-bit executable arm64",
+        "binary_sha256": "d74785483f1bd23aa6521ac94ad8419ac560618f8a6caf02aebc823f0be6f86f",
+        "embedded_git_revision": "4ce1913",
+        "execution_mode": "ssh-relay",
+        "host": "Nithins-MacBook-Air.local",
+        "imported_manual_run": true,
+        "machine": "arm64",
+        "manual_observation": {
+          "invocation_source": "Parent-confirmed simulator args match Linux reference. Canonical Pin invocation follows the hashed helper; its ephemeral Unix socket path is normalized.",
+          "limitation": "Imported after the run from observed process results and saved logs, not automatically emitted by an execution runner.",
+          "relay_tool_session_id": 4964,
+          "scarab_tool_session_id": 2621,
+          "source": "Parent agent /root observed both tool sessions finish with process exit_code 0 and supplied matching fresh remote program/tool SHA-256 values."
+        },
+        "params_sha256": "9194a20aefaaa01b91d10cc3d590693b04d508abbff4d649af212d6638c223e2",
+        "pin_exit_code": 0,
+        "pin_exit_code_source": "Derived from relay exit 0: the hashed helper remote() returns Pin process.wait(), and local() returns SSH/srun status.",
+        "pin_invocation": {
+          "launcher": [
+            "setarch",
+            "x86_64",
+            "-R"
+          ],
+          "pin_executable": "/home/ndanday/scarab-native-build/runtime/sde-external-9.44.0-2024-08-22-lin/pinkit/pin",
+          "pin_options": [
+            "-mt",
+            "0",
+            "-t",
+            "<pintool_sha256>",
+            "-socket_path",
+            "<transport_socket>",
+            "-core_id",
+            "0"
+          ],
+          "program_command": [
+            "/home/ndanday/scarab-native-build/build-linux/simple_loop"
+          ]
+        },
+        "pintool_sha256": "a4b39e4cc761c94ba053e48b353567aa72cd04f355562d53ee5c550c4ebc420d",
+        "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+        "program_sha256": "591adf5c72f48ada2c105601e37aa9b058081a31b268463127f574afdf51a7f6",
+        "recorded_at_utc": "2026-10-11T19:48:56.013001+00:00",
+        "relay_exit_code": 0,
+        "relay_helper_sha256": "6a4524af8039a2ac69cdebfd2ea75edfe625ff8fff83c284beb7201af8c293b6",
+        "remote_host": "node-25",
+        "scarab_exit_code": 0,
+        "schema_version": 1,
+        "simulation_args": [
+          "--frontend",
+          "pin_exec_driven",
+          "--pin_exec_driven_fe_socket",
+          "./pin_exec.socket",
+          "--inst_limit=10000",
+          "--full_warmup=0"
+        ],
+        "simulator_command": [
+          "/Users/nithin/dev/scarab/build/parity-binaries/scarab-arm64-pin-final",
+          "--frontend",
+          "pin_exec_driven",
+          "--pin_exec_driven_fe_socket",
+          "./pin_exec.socket",
+          "--inst_limit=10000",
+          "--full_warmup=0"
+        ],
+        "slurm_job_id": "810336",
+        "socket_protocol": "framed-v1",
+        "source_state_note": "Binary built from working source before commit81e85e5; embedded revision4ce1913 is the observed build label, not a claim that this was a clean checkout. Binary SHA-256 identifies the tested artifact."
+      },
+      "candidate_record_sha256": "1225de0ab72edaa99373a1704d7d3553871afb24cc6bee41e2e86985f17ac656",
+      "case": "natural-exit",
+      "cycles": 305,
+      "execution_input_identity_verified": true,
+      "instructions": 70,
+      "matched_csv_fields": 12703,
+      "matched_files": 13,
+      "passed": true,
+      "reference_embedded_git_revision": "949daab",
+      "reference_record": {
+        "binary_sha256": "ca7c4aeda134bbfeea75001ef4eb3ddd23026bd9c25cb67b9b2c1f5f4ec8e763",
+        "host": "node-25",
+        "machine": "x86_64",
+        "params_sha256": "9194a20aefaaa01b91d10cc3d590693b04d508abbff4d649af212d6638c223e2",
+        "pin_command": [
+          "setarch",
+          "x86_64",
+          "-R",
+          "/home/ndanday/scarab-native-build/runtime/sde-external-9.44.0-2024-08-22-lin/pinkit/pin",
+          "-mt",
+          "0",
+          "-t",
+          "/home/ndanday/scarab-native-build/source/src/pin/pin_exec/obj-intel64/pin_exec.so",
+          "-socket_path",
+          "./pin_exec.socket",
+          "-core_id",
+          "0",
+          "--",
+          "/home/ndanday/scarab-native-build/build-linux/simple_loop"
+        ],
+        "pin_exit_code": 0,
+        "pintool_sha256": "a4b39e4cc761c94ba053e48b353567aa72cd04f355562d53ee5c550c4ebc420d",
+        "platform": "Linux-5.14.0-687.39.1.el9_8.x86_64-x86_64-with-glibc2.34",
+        "program_sha256": "591adf5c72f48ada2c105601e37aa9b058081a31b268463127f574afdf51a7f6",
+        "scarab_exit_code": 0,
+        "simulation_args": [
+          "--frontend",
+          "pin_exec_driven",
+          "--pin_exec_driven_fe_socket",
+          "./pin_exec.socket",
+          "--inst_limit=10000",
+          "--full_warmup=0"
+        ],
+        "simulator_command": [
+          "/home/ndanday/scarab-native-build/build-linux/scarab",
+          "--frontend",
+          "pin_exec_driven",
+          "--pin_exec_driven_fe_socket",
+          "./pin_exec.socket",
+          "--inst_limit=10000",
+          "--full_warmup=0"
+        ],
+        "slurm_job_id": "804374",
+        "socket_protocol": "framed-v1",
+        "wall_seconds": 0.532472054939717
+      },
+      "reference_record_sha256": "7e5d08f305ca62e4b00e78d4bd724e3ff0b896696d6dd6d8155190636dcc66f9",
+      "report_path": "results/native-port/pin-natural-exit-audited-comparison.json",
+      "report_sha256": "eb84e265ab9d7f6e556e9e5bd6f1b6301936542aa92a8f54cf259b4dfcef77c7",
+      "simulation_equal": true,
+      "trace_input_identity_verified": false
+    },
+    {
+      "byte_identical": false,
+      "candidate_record": {
+        "artifact_sha256": {
+          "PARAMS.in": "9194a20aefaaa01b91d10cc3d590693b04d508abbff4d649af212d6638c223e2",
+          "PARAMS.out": "4e5e9294372796ae3b1c4fa5eb227cc936df7ac4cfb35f588e80d6ba62601a09",
+          "bp.stat.0.csv": "f7da7431d7670008a23bb227cd603e9a261fbe7d6a902f63697c506dec859cba",
+          "bp.stat.0.out": "23e78b61ddc936f33abac77a6f21d45970eb37be79b93f6642d090155c6f41ed",
+          "core.stat.0.csv": "30c29c88f02dde8cf50dd85104eb8b52ce2595d1cf3557cc93d5ce608e111b91",
+          "core.stat.0.out": "fb759b459cfa3fee8e83a34d2fe37dd3df63696700b2d20a25987bbdcd1a5646",
+          "fetch.stat.0.csv": "89587e1aa876f9d0a13d2a43ceb0ba45114270a6d3d08150b667a35c7a02f1ef",
+          "fetch.stat.0.out": "7ca02cbfd6642fae63057c191fb7aafebfd578479129981982ef29381cef5fea",
+          "inst.stat.0.csv": "e81f817038a75f6a5b3fbb296b1051760efd8e1cad9a7fe40066ea73024335e1",
+          "inst.stat.0.out": "058e5894d23e2669c2d7c1727fa60ec26ca069ddbe1f046df25d4f81a73e980b",
+          "l2l1pref.stat.0.csv": "a708933fddcb3fd2ad9ac7f9d48aa62e14d4692823d277b074e574ab039f4064",
+          "l2l1pref.stat.0.out": "08f0bc0b47c48db1260186b684853fc48d9b9efda5adb803b7a21b06f6a053f7",
+          "memory.stat.0.csv": "2df8ca89a98ee7eaea7fe2e5fd2a333b005fcbea7fd558a870fe39c748a3e00e",
+          "memory.stat.0.out": "42bed8276f1e287e44111fe7b5490445bea425855c49a87dd6e863eff17790b8",
+          "power.stat.0.csv": "355755b4ee368c3c2fb929fea380430866996954c683f65a8130891cfe4e581f",
+          "power.stat.0.out": "db4fc2ae3bfc1a73c80885cb8f04edd2a3ce4540fad379296cd61b85cfda7702",
+          "pref.stat.0.csv": "f077cbb612d63e4994f52a7f99c78bfb414ab28eee4c62704bfcc6f3b86fb9e7",
+          "pref.stat.0.out": "2ceb488846f1a6755fad5be6153a4ea3d706849da55cfe794647b79ff527bc04",
+          "ramulator.stat.out": "42d6f944641455b00cd308458b9707d0ee351dfc3e863fee30acc76abb32ee9a",
+          "relay.log": "1357249ea1deadc003efd1329e1c46fb9bca7b07bc3c4d1d6035c7e3cb2bcfa6",
+          "sim.log": "ce6dc1a08516f0ff0d153d0ef4de16649c57447a588c7c4a564c238439d6b42c",
+          "stream.stat.0.csv": "caba081f86091d9ebf74d9b03f1aeb9fc09f640c61131bb8e5ab62d0bd34c829",
+          "stream.stat.0.out": "0bdd465a5d9e73fe58060661cfae3ad15f74e4d627efa31671bfb5dd788a75f6"
+        },
+        "binary_format": "/Users/nithin/dev/scarab/build/parity-binaries/scarab-arm64-pin-final: Mach-O 64-bit executable arm64",
+        "binary_sha256": "d74785483f1bd23aa6521ac94ad8419ac560618f8a6caf02aebc823f0be6f86f",
+        "embedded_git_revision": "4ce1913",
+        "execution_mode": "ssh-relay",
+        "host": "Nithins-MacBook-Air.local",
+        "imported_manual_run": true,
+        "machine": "arm64",
+        "manual_observation": {
+          "invocation_source": "Parent-confirmed simulator args match Linux reference. Canonical Pin invocation follows the hashed helper; its ephemeral Unix socket path is normalized.",
+          "limitation": "Imported after the run from observed process results and saved logs, not automatically emitted by an execution runner.",
+          "relay_tool_session_id": 91397,
+          "scarab_tool_session_id": 89237,
+          "source": "Parent agent /root observed both tool sessions finish with process exit_code 0 and supplied matching fresh remote program/tool SHA-256 values."
+        },
+        "params_sha256": "9194a20aefaaa01b91d10cc3d590693b04d508abbff4d649af212d6638c223e2",
+        "pin_exit_code": 0,
+        "pin_exit_code_source": "Derived from relay exit 0: the hashed helper remote() returns Pin process.wait(), and local() returns SSH/srun status.",
+        "pin_invocation": {
+          "launcher": [
+            "setarch",
+            "x86_64",
+            "-R"
+          ],
+          "pin_executable": "/home/ndanday/scarab-native-build/runtime/sde-external-9.44.0-2024-08-22-lin/pinkit/pin",
+          "pin_options": [
+            "-mt",
+            "0",
+            "-t",
+            "<pintool_sha256>",
+            "-socket_path",
+            "<transport_socket>",
+            "-core_id",
+            "0"
+          ],
+          "program_command": [
+            "/home/ndanday/scarab-native-build/build-linux/simple_loop"
+          ]
+        },
+        "pintool_sha256": "a4b39e4cc761c94ba053e48b353567aa72cd04f355562d53ee5c550c4ebc420d",
+        "platform": "macOS-26.5.2-arm64-arm-64bit-Mach-O",
+        "program_sha256": "591adf5c72f48ada2c105601e37aa9b058081a31b268463127f574afdf51a7f6",
+        "recorded_at_utc": "2026-10-11T19:48:56.093445+00:00",
+        "relay_exit_code": 0,
+        "relay_helper_sha256": "6a4524af8039a2ac69cdebfd2ea75edfe625ff8fff83c284beb7201af8c293b6",
+        "remote_host": "node-25",
+        "scarab_exit_code": 0,
+        "schema_version": 1,
+        "simulation_args": [
+          "--frontend",
+          "pin_exec_driven",
+          "--pin_exec_driven_fe_socket",
+          "./pin_exec.socket",
+          "--inst_limit=20",
+          "--full_warmup=0"
+        ],
+        "simulator_command": [
+          "/Users/nithin/dev/scarab/build/parity-binaries/scarab-arm64-pin-final",
+          "--frontend",
+          "pin_exec_driven",
+          "--pin_exec_driven_fe_socket",
+          "./pin_exec.socket",
+          "--inst_limit=20",
+          "--full_warmup=0"
+        ],
+        "slurm_job_id": "810339",
+        "socket_protocol": "framed-v1",
+        "source_state_note": "Binary built from working source before commit81e85e5; embedded revision4ce1913 is the observed build label, not a claim that this was a clean checkout. Binary SHA-256 identifies the tested artifact."
+      },
+      "candidate_record_sha256": "5cce2b213f5d58ed38e81f377fe2a0826bd796226fb0c1b1f4cdf743784fe790",
+      "case": "instruction-limit",
+      "cycles": 248,
+      "execution_input_identity_verified": true,
+      "instructions": 20,
+      "matched_csv_fields": 12703,
+      "matched_files": 13,
+      "passed": true,
+      "reference_embedded_git_revision": "949daab",
+      "reference_record": {
+        "binary_sha256": "ca7c4aeda134bbfeea75001ef4eb3ddd23026bd9c25cb67b9b2c1f5f4ec8e763",
+        "host": "node-25",
+        "machine": "x86_64",
+        "params_sha256": "9194a20aefaaa01b91d10cc3d590693b04d508abbff4d649af212d6638c223e2",
+        "pin_command": [
+          "setarch",
+          "x86_64",
+          "-R",
+          "/home/ndanday/scarab-native-build/runtime/sde-external-9.44.0-2024-08-22-lin/pinkit/pin",
+          "-mt",
+          "0",
+          "-t",
+          "/home/ndanday/scarab-native-build/source/src/pin/pin_exec/obj-intel64/pin_exec.so",
+          "-socket_path",
+          "./pin_exec.socket",
+          "-core_id",
+          "0",
+          "--",
+          "/home/ndanday/scarab-native-build/build-linux/simple_loop"
+        ],
+        "pin_exit_code": 0,
+        "pintool_sha256": "a4b39e4cc761c94ba053e48b353567aa72cd04f355562d53ee5c550c4ebc420d",
+        "platform": "Linux-5.14.0-687.39.1.el9_8.x86_64-x86_64-with-glibc2.34",
+        "program_sha256": "591adf5c72f48ada2c105601e37aa9b058081a31b268463127f574afdf51a7f6",
+        "scarab_exit_code": 0,
+        "simulation_args": [
+          "--frontend",
+          "pin_exec_driven",
+          "--pin_exec_driven_fe_socket",
+          "./pin_exec.socket",
+          "--inst_limit=20",
+          "--full_warmup=0"
+        ],
+        "simulator_command": [
+          "/home/ndanday/scarab-native-build/build-linux/scarab",
+          "--frontend",
+          "pin_exec_driven",
+          "--pin_exec_driven_fe_socket",
+          "./pin_exec.socket",
+          "--inst_limit=20",
+          "--full_warmup=0"
+        ],
+        "slurm_job_id": "804374",
+        "socket_protocol": "framed-v1",
+        "wall_seconds": 0.36243622610345483
+      },
+      "reference_record_sha256": "e69c03bd052197633d42d9e1077b4f62290954830f6c1135f10ae96f76c2ff46",
+      "report_path": "results/native-port/pin-instruction-limit-audited-comparison.json",
+      "report_sha256": "77df228cf048e895ab9521aed82150f36d68d43588985a61c229801aa1c7f2dc",
+      "simulation_equal": true,
+      "trace_input_identity_verified": false
+    }
+  ],
+  "limits": [
+    "Only this fixed-address program and these two stopping conditions are established.",
+    "Not native ARM64 Pin instrumentation, general program compatibility, multicore execution, checkpoint restore, or Intel PT recording.",
+    "Host timing, paths, timestamps, revision labels and formatting are audited separately; simulation equality is not byte-identical output."
+  ],
+  "provenance": "Linux records came from the execution worker. Native records are explicitly labeled imported manual runs based on parent-observed successful Scarab and relay sessions, fresh remote input hashes, and hashed saved artifacts. No trace sidecars are fabricated.",
+  "recorded_at_utc": "2026-10-11T19:49:51.247120+00:00",
+  "same_binary_trace_smoke": {
+    "binary_sha256": "d74785483f1bd23aa6521ac94ad8419ac560618f8a6caf02aebc823f0be6f86f",
+    "cases": [
+      "mcf_r-93581",
+      "mcf-random",
+      "mcf-brrip"
+    ],
+    "cases_passed": 3,
+    "matched_csv_fields": 76218,
+    "passed": true,
+    "report_path": "results/native-port/macos-final-trace-smoke-parity.json",
+    "report_sha256": "f672538b783f97d9038529bd64f0f5d781594f98896b04b82f81357f80b541f0"
+  },
+  "schema_version": 1,
+  "scope": "Initial live single-core, single-thread x86 simple_loop execution. Pin/program run on Linux through SSH/Slurm; Scarab runs natively as ARM64 Mach-O on macOS."
+}
