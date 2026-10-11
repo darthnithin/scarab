@@ -29,6 +29,7 @@
 #include "frontend/pt_memtrace/memtrace_trace_reader.h"
 
 #include <algorithm>
+#include <cinttypes>
 #include <cstring>
 #include <fcntl.h>
 #include <fstream>
@@ -40,7 +41,6 @@
 #include <unistd.h>
 
 #include "assert.h"
-#include "elf.h"
 // #include "log.h"
 
 #define warn(...) printf(__VA_ARGS__)
@@ -68,7 +68,7 @@ TraceReader::TraceReader(const std::string& _trace, uint32_t _buf_size)
 
 TraceReader::~TraceReader() {
   if (skipped_ > 0) {
-    warn("Skipped %lu stray memory references\n", skipped_);
+    warn("Skipped %" PRIu64 " stray memory references\n", skipped_);
   }
 }
 
@@ -130,7 +130,7 @@ void TraceReader::fillCache(uint64_t _vAddr, uint8_t _reported_size, uint8_t* in
     res = xed_decode(ins, loc, _reported_size);
     if (res != XED_ERROR_NONE) {
       assert(inst_bytes == NULL || !"decode should not fail with trace-provided encodings");
-      warn("XED decode error for 0x%lx: %s %u, replacing with nop\n", _vAddr, xed_error_enum_t2str(res),
+      warn("XED decode error for 0x%" PRIx64 ": %s %u, replacing with nop\n", _vAddr, xed_error_enum_t2str(res),
            _reported_size);
       *ins = *makeNop(_reported_size);
     }
@@ -152,7 +152,7 @@ void TraceReader::fillCache(uint64_t _vAddr, uint8_t _reported_size, uint8_t* in
         }
         if (n_used_mem_ops > 0) {
           if (n_used_mem_ops > 2) {
-            warn("Unexpected %u memory operands for 0x%lx\n", n_used_mem_ops, _vAddr);
+            warn("Unexpected %u memory operands for 0x%" PRIx64 "\n", n_used_mem_ops, _vAddr);
           }
           get<MAP_MEMOPS>(xed_map_.at(_vAddr)) = n_used_mem_ops;
         }
@@ -171,10 +171,10 @@ void TraceReader::fillCache(uint64_t _vAddr, uint8_t _reported_size, uint8_t* in
     if (warn_not_found_ > 0) {
       warn_not_found_ -= 1;
       if (warn_not_found_ > 0) {
-        warn("No information for instruction at address 0x%lx", _vAddr);
+        warn("No information for instruction at address 0x%" PRIx64, _vAddr);
       } else {
         warn(
-            "No information for instruction at address 0x%lx. "
+            "No information for instruction at address 0x%" PRIx64 ". "
             "Suppressing further messages",
             _vAddr);
       }

@@ -51,7 +51,11 @@ void pin_trace_file_pointer_init(unsigned char num_cores) {
 
 void pin_trace_open(unsigned char proc_id, const char* name) {
   char cmdline[1024];
-  sprintf(cmdline, "bzip2 -dc %s", name);
+  const int command_size = snprintf(cmdline, sizeof(cmdline), "bzip2 -dc %s", name);
+  if (command_size < 0 || (size_t)command_size >= sizeof(cmdline)) {
+    fprintf(stderr, "Trace filename is too long: %s\n", name);
+    exit(1);
+  }
   pin_file[proc_id] = popen(cmdline, "r");
   printf("pin trace should be opened now for core %u: %s \n", proc_id, name);
   if (!pin_file[proc_id]) {

@@ -29,6 +29,7 @@
 #include "frontend/pt_memtrace/memtrace_trace_reader_memtrace.h"
 
 #include <cstdlib>
+#include <cinttypes>
 #include <cstring>
 #include <iostream>
 
@@ -45,7 +46,6 @@ extern scatter_info_map scatter_info_storage;
 
 #include "dr_api.h"
 #include "dr_ir_instr.h"
-#include "elf.h"
 
 #define warn(...) printf(__VA_ARGS__)
 #define panic(...) printf(__VA_ARGS__)
@@ -286,8 +286,6 @@ uint8_t dr_isa_to_scarab_reg(reg_id_t reg) {
 // Trace Reader
 TraceReaderMemtrace::TraceReaderMemtrace(const std::string& _trace, uint32_t _bufsize)
     : TraceReader(_trace, _bufsize),
-      module_mapper_(nullptr),
-      directory_(),
       dcontext_(nullptr),
       knob_verbose_(0),
       trace_has_encodings_(false),
@@ -306,7 +304,7 @@ TraceReaderMemtrace::TraceReaderMemtrace(const std::string& _trace, uint32_t _bu
 
 TraceReaderMemtrace::~TraceReaderMemtrace() {
   if (mt_warn_target_ > 0) {
-    warn("Set %lu conditional branches to 'not-taken' due to pid/tid gaps\n", mt_warn_target_);
+    warn("Set %" PRIu64 " conditional branches to 'not-taken' due to pid/tid gaps\n", mt_warn_target_);
   }
 }
 
@@ -324,7 +322,7 @@ void TraceReaderMemtrace::init(const std::string& _trace) {
 // TODO: Detect memtrace/module.log type dynamically
 #ifdef ZSIM_USE_YT
 /* Below is required to parse Google Memtraces that contain an extra column */
-const char* TraceReaderMemtrace::parse_buildid_string(const char* src, OUT void** data) {
+const char* TraceReaderMemtrace::parse_buildid_string(const char* src, void** data) {
   // We just skip the string.  We don't store it as we're not using it here.
   const char* comma = strchr(src, ',');
   if (comma == nullptr)
@@ -400,11 +398,18 @@ bool TraceReaderMemtrace::initTrace() {
   ASSERT(0, type != 0 && "Filetype detection failed: got 0x0 (trace file is missing header)");
 
   if (dcontext_ == nullptr) {
+#ifdef SCARAB_STANDALONE_DECODER
+    // The static decoder does not initialize the instrumentation runtime or
+    // inspect the host ISA. It can decode x86 traces on an ARM64 host.
+    dcontext_ = GLOBAL_DCONTEXT;
+#else
     dcontext_ = dr_standalone_init();
+#endif
   }
 
   trace_has_encodings_ = type & dynamorio::drmemtrace::OFFLINE_FILE_TYPE_ENCODINGS;
-  if (type & dynamorio::drmemtrace::OFFLINE_FILE_TYPE_ARCH_REGDEPS) {
+  trace_is_regdeps_ = type & dynamorio::drmemtrace::OFFLINE_FILE_TYPE_ARCH_REGDEPS;
+  if (trace_is_regdeps_) {
     dr_isa_mode_t dummy;
     dr_set_isa_mode(dcontext_, DR_ISA_REGDEPS, &dummy);
   } else {
@@ -450,13 +455,15 @@ bool TraceReaderMemtrace::getNextInstruction__(InstInfo* _info, InstInfo* _prior
     switch (mt_state_) {
       case (MTState::INST):
         if (type_is_instr(mt_ref_.instr.type)) {
-          instr_reset(dcontext_, &probe.instr);
-          decode(dcontext_, mt_ref_.instr.encoding, &probe.instr);
-          const bool is_regdeps = (instr_get_isa_mode(&probe.instr) == DR_ISA_REGDEPS);
-          if (is_regdeps) {
+          // The trace header describes the simulated ISA; the host ISA is
+          // irrelevant. XED performs all decoding on the x86 trace path.
+          if (trace_is_regdeps_) {
+            dr_set_isa_mode(dcontext_, DR_ISA_REGDEPS, nullptr);
+            instr_reset(dcontext_, &probe.instr);
+            decode(dcontext_, mt_ref_.instr.encoding, &probe.instr);
             processDrIsaInst(_info, 0, &probe.instr);
           } else {
-            processInst(_info, &probe.instr);
+            processInst(_info);
           }
           if (mt_mem_ops_ > 0) {
             mt_state_ = MTState::MEM1;
@@ -487,10 +494,11 @@ bool TraceReaderMemtrace::getNextInstruction__(InstInfo* _info, InstInfo* _prior
           if (!_prior->unknown_type) {
             if (skipped_ == 0) {
               warn(
-                  "Stray memory record detected at seq. %lu: PC: 0x%lx, "
-                  "PID: %lu, TID: %lu, Addr: 0x%lx. "
+                  "Stray memory record detected at seq. %" PRIu64 ": PC: 0x%lx, "
+                  "PID: %" PRIu64 ", TID: %" PRIu64 ", Addr: 0x%lx. "
                   "Suppressing further messages.\n",
-                  mt_seq_, mt_ref_.data.pc, mt_ref_.data.pid, mt_ref_.data.tid, mt_ref_.data.addr);
+                  mt_seq_, mt_ref_.data.pc, static_cast<uint64_t>(mt_ref_.data.pid),
+                  static_cast<uint64_t>(mt_ref_.data.tid), mt_ref_.data.addr);
             }
             skipped_++;
           }
@@ -511,7 +519,7 @@ bool TraceReaderMemtrace::getNextInstruction__(InstInfo* _info, InstInfo* _prior
               complete = true;
             }
           } else {
-            warn("Unexpected PID/TID/PC switch following 0x%lx\n", _info->pc);
+            warn("Unexpected PID/TID/PC switch following 0x%" PRIx64 "\n", _info->pc);
             mt_state_ = MTState::INST;
           }
         } else {
@@ -538,7 +546,7 @@ bool TraceReaderMemtrace::getNextInstruction__(InstInfo* _info, InstInfo* _prior
             mt_state_ = MTState::INST;
             complete = true;
           } else {
-            warn("Unexpected PID/TID/PC switch following 0x%lx\n", _info->pc);
+            warn("Unexpected PID/TID/PC switch following 0x%" PRIx64 "\n", _info->pc);
             mt_state_ = MTState::INST;
           }
         } else {
@@ -573,7 +581,7 @@ PATCH_REP:
         if (mt_warn_target_ == 0) {
           warn(
               "Detected a conditional branch preceding a pid/tid change "
-              "at seq. %lu. Assuming not-taken. Suppressing further "
+              "at seq. %" PRIu64 ". Assuming not-taken. Suppressing further "
               "messages.\n",
               mt_seq_ - 1);
         }
@@ -613,7 +621,7 @@ PATCH_REP:
       _prior->mem_is_wr[0] = false;
       _prior->mem_is_wr[1] = false;
       _prior->is_dr_ins = false;
-      warn("Patching gap in trace by injecting a Jmp, prior PC: %lx next PC: %lx\n", _prior->pc, _info->pc);
+      warn("Patching gap in trace by injecting a Jmp, prior PC: %" PRIx64 " next PC: %" PRIx64 "\n", _prior->pc, _info->pc);
     }
     _prior->target = _info->pc;  // TODO(granta): Invalid for pid/tid switch
   } else {
@@ -944,8 +952,7 @@ void TraceReaderMemtrace::processDrIsaInst(InstInfo* _info, bool has_another_mem
   _info->dr_trace_type = (int)mt_ref_.instr.type;
 }
 
-void TraceReaderMemtrace::processInst(InstInfo* _info, [[maybe_unused]] instr_t* predecoded_dr) {
-  // Same bytes as predecoded_dr; XED decode below is still required for mem-op/REP/SIMD/x87/cf helpers.
+void TraceReaderMemtrace::processInst(InstInfo* _info) {
   _info->pc = mt_ref_.instr.addr;
   mt_prior_isize_ = mt_ref_.instr.size;
 
@@ -1070,18 +1077,12 @@ const InstInfo* TraceReaderMemtrace::getNextInstruction() {
 }
 
 bool TraceReaderMemtrace::locationForVAddr(uint64_t _vaddr, uint8_t** _loc, uint64_t* _size) {
-  assert(module_mapper_ != nullptr && "Module mapper is not initialized");
-
-  app_pc module_start;
-  size_t module_size;
-
-  *_loc = module_mapper_->find_mapped_trace_bounds(reinterpret_cast<app_pc>(_vaddr), &module_start, &module_size);
-  *_size = reinterpret_cast<uint64_t>(module_size) -
-           (reinterpret_cast<uint64_t>(*_loc) - reinterpret_cast<uint64_t>(module_start));
-  if (!module_mapper_->get_last_error().empty()) {
-    std::cout << "Failed to find mapped address: " << std::hex << _vaddr
-              << " Error: " << module_mapper_->get_last_error() << std::endl;
-    return false;
-  }
-  return true;
+  // This frontend has no module-log mapper; it consumes finalized traces with
+  // embedded encodings. Previously this path dereferenced an uninitialized
+  // module_mapper_, and unnecessarily linked the raw-trace conversion runtime.
+  (void)_vaddr;
+  *_loc = nullptr;
+  *_size = 0;
+  panic("Memtrace instruction encodings are required; module-log mapping is not initialized\n");
+  std::abort();
 }

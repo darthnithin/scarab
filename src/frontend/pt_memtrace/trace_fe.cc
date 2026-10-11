@@ -28,6 +28,7 @@
 
 #include "debug/debug.param.h"
 #include "debug/debug_macros.h"
+#include <cinttypes>
 // #include "globals/global_defs.h"
 // #include "globals/global_types.h"
 // #include "globals/global_vars.h"
@@ -500,7 +501,7 @@ void output_counts(uint64_t num_of_segments, bb_counts counts_dynamic, bb_counts
       "TRACE_INST_TAKEN_CF_RET",  "TRACE_INST_TAKEN_CF_SYS",
   };
 
-  printf("to be appened segment num %ld\n", num_of_segments);
+  printf("to be appened segment num %" PRIu64 "\n", num_of_segments);
   std::cout << counts_dynamic.total_size << std::endl;
   std::cout << counts_dynamic.fetched_size << std::endl;
 
@@ -517,7 +518,7 @@ void output_counts(uint64_t num_of_segments, bb_counts counts_dynamic, bb_counts
       counter++;
       printf("%lu bbs with same first pc\n", i->second.size());
       for (unsigned j = 0; j < i->second.size(); j++) {
-        printf("[%ld]: size %ld, freq %ld\n", i->second[j].bb_id, i->second[j].ins_list.size(), i->second[j].freq);
+        printf("[%" PRIu64 "]: size %zu, freq %" PRIu64 "\n", i->second[j].bb_id, i->second[j].ins_list.size(), i->second[j].freq);
         for (unsigned k = 0; k < i->second[j].ins_list.size(); k++) {
           printf("%s: %u, %d\n", hexstr64s(i->second[j].ins_list[k].instruction_addr),
                  i->second[j].ins_list[k].true_op_type, i->second[j].ins_list[k].last_inst_from_trace);
@@ -530,12 +531,12 @@ void output_counts(uint64_t num_of_segments, bb_counts counts_dynamic, bb_counts
 
   printf(
       "========================================================\n"
-      "Number of blocks built : %ld\n"
+      "Number of blocks built : %" PRIu64 "\n"
       "     Average size      : %5.2lf instructions\n"
-      "Number of blocks executed  : %ld\n"
+      "Number of blocks executed  : %" PRIu64 "\n"
       "     Average weighted size : %5.2lf instructions\n"
-      "Number of total instructions  : %ld\n"
-      "Number of fetched instruction : %ld\n"
+      "Number of total instructions  : %" PRIu64 "\n"
+      "Number of fetched instruction : %" PRIu64 "\n"
       "========================================================\n",
       counts_as_built.blocks, counts_as_built.total_size / (double)counts_as_built.blocks, counts_dynamic.blocks,
       counts_dynamic.total_size / (double)counts_dynamic.blocks, counts_dynamic.total_size,
@@ -672,7 +673,7 @@ void ext_trace_extract_basic_block_vectors() {
 
           if (bb_identity_map[bb_key].size() > 1) {
             for (uint i = 0; i < cur_bb.ins_list.size(); i++) {
-              fprintf(stderr, "[%lu]: ad: %p, op: %d\n", map_lookup->second.bb_id,
+              fprintf(stderr, "[%" PRIu64 "]: ad: %p, op: %d\n", map_lookup->second.bb_id,
                       (void *)cur_bb.ins_list[i].instruction_addr, cur_bb.ins_list[i].true_op_type);
             }
             fprintf(stderr, "DUP bb detected%s\n", success ? "" : " at trace end");

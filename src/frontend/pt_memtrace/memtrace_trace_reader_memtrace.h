@@ -34,9 +34,8 @@
 
 #undef ASSERT
 #undef UNUSED
-#include "analyzer.h"
-#include "raw2trace.h"
-#include "raw2trace_directory.h"
+#include "dr_api.h"
+#include "reader.h"
 
 
 class TraceReaderMemtrace : public TraceReader {
@@ -49,21 +48,19 @@ class TraceReaderMemtrace : public TraceReader {
   bool initTrace() override;
   bool locationForVAddr(uint64_t _vaddr, uint8_t** _loc, uint64_t* _size) override;
   void init(const std::string& _trace);
-  static const char* parse_buildid_string(const char* src, OUT void** data);
+  static const char* parse_buildid_string(const char* src, void** data);
   bool getNextInstruction__(InstInfo* _info, InstInfo* _prior);
-  /// predecoded_dr: DR decode from the trace probe (same bytes); XED still decodes below.
-  void processInst(InstInfo* _info, instr_t* predecoded_dr);
+  void processInst(InstInfo* _info);
   /// When non-null and encoding_is_new, use this instead of decoding again (caller-owned).
   void processDrIsaInst(InstInfo* _info, bool has_another_mem, instr_t* predecoded);
   uint32_t add_dependency_info(ctype_pin_inst* info, instr_t* drinst);
   void fill_in_basic_info(ctype_pin_inst* info, instr_t* drinst, size_t size, dynamorio::drmemtrace::trace_type_t type);
   bool typeIsMem(dynamorio::drmemtrace::trace_type_t _type);
 
-  std::unique_ptr<dynamorio::drmemtrace::module_mapper_t> module_mapper_ = nullptr;
-  dynamorio::drmemtrace::raw2trace_directory_t directory_ = {};
   void* dcontext_ = nullptr;
   unsigned int knob_verbose_ = 0;
   bool trace_has_encodings_ = false;
+  bool trace_is_regdeps_ = false;
 
   enum class MTState {
     INST,
