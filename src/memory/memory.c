@@ -27,6 +27,8 @@
  ***************************************************************************************/
 /*** CMP  remov all the wrong path stuff  ***/
 
+#include "libs/scarab_sort.h"
+
 #include "libs/scarab_random.h"
 
 #include "memory.h"
@@ -875,17 +877,17 @@ void update_memory_queues() {
   }
 
   if (!ALL_FIFO_QUEUES && (cycle_l1q_insert_count > 0)) {
-    qsort(mem->l1_queue.base, mem->l1_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
+    scarab_stable_sort(mem->l1_queue.base, mem->l1_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
     cycle_l1q_insert_count = 0;
   }
 
   if (!ALL_FIFO_QUEUES && (cycle_mlcq_insert_count > 0)) {
-    qsort(mem->mlc_queue.base, mem->mlc_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
+    scarab_stable_sort(mem->mlc_queue.base, mem->mlc_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
     cycle_mlcq_insert_count = 0;
   }
 
   if (!ALL_FIFO_QUEUES && (cycle_busoutq_insert_count > 0)) {
-    qsort(mem->bus_out_queue.base, mem->bus_out_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
+    scarab_stable_sort(mem->bus_out_queue.base, mem->bus_out_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
     cycle_busoutq_insert_count = 0;
   }
 }
@@ -1955,7 +1957,7 @@ static void mem_process_l1_reqs() {
     /* After this sort requests that should be removed will be at the tail of
      * the l1_queue */
     DEBUG(0, "l1_queue removal\n");
-    qsort(mem->l1_queue.base, mem->l1_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
+    scarab_stable_sort(mem->l1_queue.base, mem->l1_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
     mem->l1_queue.entry_count -= l1_queue_removal_count;
     ASSERT(req->proc_id, mem->l1_queue.entry_count >= 0);
     /* Requests stay in the queues until filled (by reserving
@@ -1966,9 +1968,9 @@ static void mem_process_l1_reqs() {
   /* Sort the out queue if requests were inserted */
   if (!ALL_FIFO_QUEUES && (out_queue_insertion_count > 0)) {
     if (CONSTANT_MEMORY_LATENCY) {  // request went straight to L1 fill queue
-      qsort(mem->l1fill_queue.base, mem->l1fill_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
+      scarab_stable_sort(mem->l1fill_queue.base, mem->l1fill_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
     } else {
-      qsort(mem->bus_out_queue.base, mem->bus_out_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
+      scarab_stable_sort(mem->bus_out_queue.base, mem->bus_out_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
     }
   }
 }
@@ -2033,7 +2035,7 @@ static void mem_process_mlc_reqs() {
     /* After this sort requests that should be removed will be at the tail of
      * the mlc_queue */
     DEBUG(0, "mlc_queue removal\n");
-    qsort(mem->mlc_queue.base, mem->mlc_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
+    scarab_stable_sort(mem->mlc_queue.base, mem->mlc_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
     mem->mlc_queue.entry_count -= mlc_queue_removal_count;
     ASSERT(req->proc_id, mem->mlc_queue.entry_count >= 0);
     /* Requests stay in the queues until filled (by reserving
@@ -2043,7 +2045,7 @@ static void mem_process_mlc_reqs() {
 
   /* Sort the l1 queue if requests were inserted */
   if (!ALL_FIFO_QUEUES && (l1_queue_insertion_count > 0)) {
-    qsort(mem->l1_queue.base, mem->l1_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
+    scarab_stable_sort(mem->l1_queue.base, mem->l1_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
   }
 }
 
@@ -2113,7 +2115,7 @@ static void remove_from_l1_fill_queue(uns proc_id, int* p_l1fill_queue_removal_c
     /* After this sort requests that should be removed will be at the tail of
      * the l1_queue */
     DEBUG(0, "l1fill_queue removal\n");
-    qsort(mem->l1fill_queue.base, mem->l1fill_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
+    scarab_stable_sort(mem->l1fill_queue.base, mem->l1fill_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
     mem->l1fill_queue.entry_count -= *p_l1fill_queue_removal_count;
     ASSERT(proc_id, mem->l1fill_queue.entry_count >= 0);
     /* free corresponding reserved entries in the L1 queue */
@@ -2277,7 +2279,7 @@ static void mem_process_mlc_fill_reqs() {
     /* After this sort requests that should be removed will be at the tail of
      * the mlc_queue */
     DEBUG(0, "mlc_fill_queue removal\n");
-    qsort(mem->mlc_fill_queue.base, mem->mlc_fill_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
+    scarab_stable_sort(mem->mlc_fill_queue.base, mem->mlc_fill_queue.entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
     mem->mlc_fill_queue.entry_count -= mlc_fill_queue_removal_count;
     ASSERT(req->proc_id, mem->mlc_fill_queue.entry_count >= 0);
     /* free corresponding reserved entries in the MLC queue */
@@ -2325,7 +2327,7 @@ static void mem_process_core_fill_reqs(uns proc_id) {
     /* After this sort requests that should be removed will be at the tail of
      * the core_fill_queue */
     DEBUG(0, "core_fill_queue removal\n");
-    qsort(core_fill_queue->base, core_fill_queue->entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
+    scarab_stable_sort(core_fill_queue->base, core_fill_queue->entry_count, sizeof(Mem_Queue_Entry), mem_compare_priority);
     core_fill_queue->entry_count -= core_fill_queue_removal_count;
     ASSERT(req->proc_id, core_fill_queue->entry_count >= 0);
   }
@@ -2781,7 +2783,7 @@ Flag mem_adjust_matching_request(Mem_Req* req, Mem_Req_Type type, Addr addr, uns
         req->type = type;
         memview_req_changed_type(req);
       }
-      qsort(req->queue->base, req->queue->entry_count, sizeof(Mem_Queue_Entry),
+      scarab_stable_sort(req->queue->base, req->queue->entry_count, sizeof(Mem_Queue_Entry),
             mem_compare_priority); /* Sort the associated queue */
     }
 

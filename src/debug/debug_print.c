@@ -26,6 +26,8 @@
  * Description  : Functions to print out various debugging information.
  ***************************************************************************************/
 
+#include "libs/scarab_sort.h"
+
 #include "debug/debug_print.h"
 
 #include <stdio.h>
@@ -389,7 +391,7 @@ static int print_reg_array(char* buf, Static_Reg_Info* regs, uns num) {
   ASSERT(0, num <= MAX2(MAX_SRCS, MAX_DESTS));
   for (i = 0; i < num; ++i)
     reg_buf[i] = regs[i].id;
-  qsort(reg_buf, num, sizeof(uns16), compare_reg_ids);
+  scarab_stable_sort(reg_buf, num, sizeof(uns16), compare_reg_ids);
   for (i = 0; i < num; ++i)
     buf += sprintf(buf, " %s", disasm_reg(reg_buf[i]));
   return buf - orig_buf;

@@ -27,6 +27,8 @@
  **mess* with
  ***************************************************************************************/
 
+#include "libs/scarab_sort.h"
+
 #include <math.h>
 #include <strings.h>
 
@@ -207,7 +209,7 @@ void pref_init(void) {
     if (pref_table[ii].init_func)
       pref_table[ii].init_func(&pref_table[ii]);
   }
-  qsort(pref_table, pref_table_size, sizeof(HWP), pref_compare_hwp_priority);
+  scarab_stable_sort(pref_table, pref_table_size, sizeof(HWP), pref_compare_hwp_priority);
 
   if (PREF_TRACE_ON)
     PREF_TRACE_OUT = file_tag_fopen(NULL, pref_trace_filename, "w");
@@ -259,7 +261,7 @@ void pref_done(void) {
     void** new_array = hash_table_flatten(mem->pref_loadPC_hash, NULL);
     FILE* PREF_LOADPC_FILE = file_tag_fopen(NULL, "pref_loadpc", "w");
 
-    qsort(new_array, mem->pref_loadPC_hash->count, sizeof(void*), pref_compare_prefloadhash);
+    scarab_stable_sort(new_array, mem->pref_loadPC_hash->count, sizeof(void*), pref_compare_prefloadhash);
     // Print To File
 
     for (ii = 0; ii < mem->pref_loadPC_hash->count; ii++) {
