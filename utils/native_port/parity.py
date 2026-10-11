@@ -216,7 +216,8 @@ def run_case(args):
         command = [str(binary), *sim_args, f"--cbp_trace_r0={trace}"]
         environment = os.environ.copy()
         if args.library_path:
-            environment["LD_LIBRARY_PATH"] = args.library_path
+            inherited = environment.get("LD_LIBRARY_PATH")
+            environment["LD_LIBRARY_PATH"] = args.library_path + (":" + inherited if inherited else "")
         start = time.monotonic()
         record = {"case": case["name"], "trace_sha256": sha256(trace),
                   "params_sha256": sha256(params_file), "binary_sha256": sha256(binary),

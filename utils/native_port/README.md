@@ -64,8 +64,10 @@ python3 utils/native_port/parity.py run \
 
 Select one or several cases using repeated `--case NAME`. The runner refuses
 to overwrite a nonempty case directory. Use `--jobs 4` to run four independent
-cases concurrently within the machine's CPU and memory budget. On Linux, use `--library-path` when
-running a bundled baseline with shared libraries. The simulator binary's hash
+cases concurrently within the machine's CPU and memory budget. On Linux, use
+`--library-path` when running a bundled baseline with shared libraries. These
+directories are prepended to the inherited `LD_LIBRARY_PATH`, preserving any
+compiler runtime supplied by an environment module. The simulator binary's hash
 may differ across host architectures; the input trace and parameters may not.
 
 For this user's previously downloaded Hummingbird corpus,
@@ -134,9 +136,25 @@ python3 utils/native_port/parity.py compare-suite \
 
 The suite is broad real-workload regression, not an exhaustive x86 ISA proof.
 It does not prove every optional simulator feature, cache policy, DRAM type,
-multi-core configuration, REGDEPS/ARM trace format, or legacy Pin trace format.
-Raw/gzip/zip input transport should be checked independently on equivalent
-bytes. The full suite covers 20 of the existing 59 lab intervals. All 59 would
+multi-core configuration, ARM trace format, or legacy Pin trace format.
+The separate synthetic fixtures exercise x86 and REGDEPS records in equivalent
+raw, gzip, and ZIP containers, including conditional branches, calls/returns,
+vector dependencies, x87 operations, memory accesses, and changed encodings:
+
+```sh
+python3 utils/native_port/trace_fixtures.py --build-dir src/build/native
+python3 utils/native_port/parity.py run \
+  --manifest build/native-trace-fixtures/suite.json \
+  --binary src/build/native/scarab --params src/PARAMS.golden_cove \
+  --trace-root build/native-trace-fixtures --output results/native-synthetic
+```
+
+Copy these exact generated trace bytes and manifest to the reference host and
+run the same suite there, then compare the two result roots with provenance.
+The generator also checks REGDEPS encode/decode round trips; generated files are
+redistributable and do not require the licensed SPEC corpus.
+
+The full suite covers 20 of the existing 59 lab intervals. All 59 would
 need to be rerun on the native candidate before claiming that the entire
 original lab campaign matches. Reusing their measured outputs alone cannot
 prove a new binary.
