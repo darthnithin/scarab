@@ -1,42 +1,46 @@
-# SYSTEM REQUIREMENTS
+# System requirements
 
-Please be sure that your system meets these minimum software prerequisits
-before running Scarab. Below are the packages that we use to run Scarab.
-Other versions of the same software may work, but have not been tested.
+Requirements depend on whether you replay an existing trace or instrument a
+live program. The simulated workload ISA is x86 even on an ARM64 host.
 
-Scarab relies on the following software packages:
+## Native Apple Silicon replay
 
-## Required Packages
-* [Intel PIN (see below)](#tested-intel-pin-versions)
-* g++ 7.3.1
-* gcc 7.3.1
-* Clang 5.0.1
-* Python 3.6.3
-* [Intel XED 12.01](https://github.com/intelxed/xed/releases) (included as a git submodule)
+Use Xcode Command Line Tools, Git, Python 3.9+, CMake, Boost headers, Snappy, and
+LZ4. The [macOS guide](native-macos.md) provides Homebrew and build commands.
+The validated host is Apple Silicon macOS; Intel Macs are outside this port's
+acceptance coverage. Intel Pin and a Linux VM are not required for replay.
 
-## Tested Intel PIN versions:
-* [PIN-Play 3.5](https://software.intel.com/en-us/articles/program-recordreplay-toolkit)
-* [PIN 3.15](https://www.intel.com/content/www/us/en/developer/articles/tool/pin-a-binary-instrumentation-tool-downloads.html)
+## Linux builds
 
-Note: Our checkpoint creater scripts only work with PIN-Play currently (due to a despendency with their simpoint scripts).
+The Linux comparison and Pin workflows were validated on x86-64 Linux.
+Use a C99/C++17 compiler toolchain, Git, Python 3, CMake (Scarab requires 3.13 or
+newer), Boost headers, and the development headers/libraries for Snappy, LZ4,
+and zlib. Python validation/relay tools require Python 3.9+.
+On Linux, the memtrace frontend also links the system `dl`, `rt`, and pthread
+libraries. Intel XED, mbuild, and DynamoRIO are pinned Git submodules.
+See [compiling Scarab](compiling-scarab.md) for the trace-only CMake build.
 
-## Required Python Packages
-See `$SCARAB_ROOT/bin/requirements.txt`
+Older upstream documentation listed GCC/G++ 7.3.1, Clang 5.0.1, and Python 3.6.3.
+Those are historical versions, not the requirements of this fork's newer tools.
 
-##### E.g. Install with pip:
-```
-cd $SCARAB_ROOT/bin
-pip3 install -r requirements.txt
-```
+## Intel Pin and checkpoints
 
-# Other Useful Packages
+Pin is needed to instrument live x86 programs, not to replay existing memtraces.
+The existing Linux workflows documented Pin 3.15 and PinPlay 3.5. The experimental
+remote-execution checks used SDE 9.44's `pinkit` (Pin 3.31) in plain Pin mode,
+with `pin_exec.so` rebuilt from this fork. These are workflow-specific records,
+not a guarantee that interchangeable Pin versions work.
 
-## If Running GTest
-* GTest 1.6
+The legacy checkpoint creation scripts depend on PinPlay. Native ARM64 Pin,
+macOS checkpoint restore, and Intel PT recording are not provided by this port.
+See [remote Pin execution](remote-pin.md) for the supported experimental path.
 
-## If Using Power Model
-* Perl 5 v5.16.3
-* [McPAT v1.0](http://www.hpl.hp.com/research/mcpat/)
-* [CACTI 6.5](http://www.hpl.hp.com/research/cacti/)
+## Optional tools
 
-Note: Lower or higher versions of the above software may work, but have not been tested.
+The native build and differential harness do not require the legacy Python
+launcher packages. For those launchers, install `bin/requirements.txt` in a
+separate Python environment appropriate to the workflow.
+
+Power modeling uses external McPAT/CACTI tooling and Perl. Upstream documented
+McPAT 1.0 and CACTI 6.5; this native port has not validated that toolchain.
+Optional GTest-based checks likewise require their own dependencies.

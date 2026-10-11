@@ -1,4 +1,7 @@
-# Common Problems
+# Common problems
+
+For native Mac SDK, architecture, dependency, or trace-input issues, start with
+[macOS troubleshooting](native-macos.md#troubleshooting).
 ## MAPPING NEW INSTRUCTIONS
 
 Scarab was tested on a subset of the SPEC 2017 benchmarks. It is possible (and

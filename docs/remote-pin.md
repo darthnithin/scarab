@@ -1,4 +1,8 @@
-# Live x86 execution with a native Mac simulator
+# Experimental remote Pin execution
+
+**Validated scope:** two fixed-address, single-threaded `simple_loop` cases.
+General application and multicore compatibility remain unverified. For the
+fully tested trace workflow, start with [native macOS replay](native-macos.md).
 
 The native ARM64 Scarab simulator can exchange execution-driven frontend
 messages with a Linux Intel Pin process through SSH. The x86 program and Pin
@@ -16,7 +20,7 @@ replay remains entirely local and does not require this launcher or a VM.
 
 Build `pin_exec.so` from the same source revision as the native simulator,
 using the existing `src/pin/pin_exec` makefile and a compatible `PIN_ROOT`.
-The course runtime is SDE 9.44's `pinkit` (Pin 3.31); build in plain Pin mode,
+The validated runtime was SDE 9.44's `pinkit` (Pin 3.31); build in plain Pin mode,
 without `SCARAB_ENABLE_PINPLAY` or `ENABLE_PINPLAY`. Run compilation inside a
 Slurm allocation according to the site's policy.
 

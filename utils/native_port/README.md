@@ -58,7 +58,7 @@ The licensed traces are not committed. Supply them as
 ```sh
 python3 utils/native_port/parity.py run \
   --manifest utils/native_port/suite.json \
-  --binary build/native/scarab --params src/PARAMS.golden_cove \
+  --binary src/build/opt/scarab --params src/PARAMS.golden_cove \
   --trace-root /path/to/traces --output results/macos
 ```
 
@@ -70,19 +70,16 @@ directories are prepended to the inherited `LD_LIBRARY_PATH`, preserving any
 compiler runtime supplied by an environment module. The simulator binary's hash
 may differ across host architectures; the input trace and parameters may not.
 
-For this user's previously downloaded Hummingbird corpus,
-`hummingbird_worker.py` adapts the same suite to the CSE220 runtime and trace
-paths. It refuses to run outside a Slurm allocation. Stage the three Python/C
-files and manifest in `~/scarab-native-parity/tools`, create the parent
-`results` directory, then use:
+On a Slurm cluster, run the harness inside an allocation using the site's
+normal submission procedure. Set `--jobs` no higher than the allocated CPU
+count, make the same trace bytes available on both hosts, and copy the result
+folders back before comparison. No personal launcher or particular cluster is
+required by `parity.py`.
 
-```sh
-~/dev/perch/bin/perch run --host ndanday@hb.ucsc.edu \
-  --workdir /home/ndanday/scarab-native-parity --partition 256x44 \
-  --cpus 1 --mem 4G --time 10m --array '0-22%4' --name scarab-parity \
-  --module miniconda3/3.13 --submit -- \
-  python3 /home/ndanday/scarab-native-parity/tools/hummingbird_worker.py
-```
+`hummingbird_worker.py` is an optional adapter for the historical CSE220 corpus
+layout. It requires Slurm and defaults to `~/cse220-orbstack-check`; override
+that root with `SCARAB_LINUX_ORACLE_ROOT`. Read its path assumptions before use.
+It is not the general setup route for new users.
 
 The adapter uses the existing known Linux oracle; it is not a rebuild check.
 After source changes, also build and run the modified source on Linux and
@@ -142,10 +139,10 @@ raw, gzip, and ZIP containers, including conditional branches, calls/returns,
 vector dependencies, x87 operations, memory accesses, and changed encodings:
 
 ```sh
-python3 utils/native_port/trace_fixtures.py --build-dir src/build/native
+python3 utils/native_port/trace_fixtures.py --build-dir src/build/opt
 python3 utils/native_port/parity.py run \
   --manifest build/native-trace-fixtures/suite.json \
-  --binary src/build/native/scarab --params src/PARAMS.golden_cove \
+  --binary src/build/opt/scarab --params src/PARAMS.golden_cove \
   --trace-root build/native-trace-fixtures --output results/native-synthetic
 ```
 
@@ -154,16 +151,41 @@ run the same suite there, then compare the two result roots with provenance.
 The generator also checks REGDEPS encode/decode round trips; generated files are
 redistributable and do not require the licensed SPEC corpus.
 
-The full suite covers 20 of the existing 59 lab intervals. All 59 would
-need to be rerun on the native candidate before claiming that the entire
-original lab campaign matches. Reusing their measured outputs alone cannot
-prove a new binary.
+`suite-full.json` covers 20 selected full-length intervals. The separate
+`suite-lab1.json` covers all 59 intervals, and the completed native rerun is
+recorded in [the validation results](../../docs/validation-results.md).
+For new runs on both hosts, use the same manifest and require provenance:
+
+```sh
+python3 utils/native_port/parity.py run \
+  --manifest utils/native_port/suite-lab1.json \
+  --binary src/build/opt/scarab --params src/PARAMS.golden_cove \
+  --trace-root /path/to/traces --output results/macos-lab1 --jobs 4
+python3 utils/native_port/parity.py compare-suite \
+  results/linux-lab1 results/macos-lab1 \
+  --manifest utils/native_port/suite-lab1.json \
+  --require-provenance --report results/lab1-parity.json
+```
+
+Run the corresponding `parity.py run` command on Linux first, selecting its
+Linux binary and `results/linux-lab1` output. Then bring both result roots to
+one host. The manifest uses nested case directories (`workload/cluster_id`).
+Its one positional `None` argument reproduces a historical wrapper invocation;
+see the [audit explanation](../../docs/validation-results.md#what-matches-linux-means).
+The lab-specific importer above covers the selected historical subset, not a
+general import procedure for arbitrary historical result folders.
 
 Pin execution-driven tracing, checkpoint restore, and Intel PT recording are
 separate from offline simulation. Passing this suite does not imply that native
 ARM macOS can launch Linux/x86 workloads through Intel Pin.
 
 ## Recorded acceptance results
+
+The later **59-interval rerun** passed 1,498,954 numeric fields; see
+[`lab1-validation-2026-10-11.json`](lab1-validation-2026-10-11.json) and the
+[public results guide](../../docs/validation-results.md). Its historical input
+audit is distinct from runner provenance. The earlier matrix below is retained
+with its original binary identities.
 
 The October 11, 2026 acceptance run passed the following comparisons. Every row
 requires matching input provenance and compares text statistics, all Ramulator

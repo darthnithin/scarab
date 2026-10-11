@@ -1,3 +1,8 @@
+# Intel Pin frontend
+
+This page describes the existing execution-driven design. Native ARM64 macOS
+replay does not use Pin. See [remote Pin execution](remote-pin.md) for the
+experimental Linux-Pin/Mac-simulator workflow and its validation limits.
 
 Scarab is an execute-at-fetch model simulator. That is to say, a functional
 model executes each instruction before it is fetched. We refer to the function

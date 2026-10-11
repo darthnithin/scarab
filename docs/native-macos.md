@@ -1,29 +1,79 @@
-# Building Scarab on Apple Silicon
+# Native Scarab on Apple Silicon
 
-Scarab can build as an ARM64 macOS executable while continuing to simulate the
-x86 instruction streams in existing traces. The host architecture and the
-simulated instruction set are separate: Intel XED decodes x86 instructions in
-portable C, and the DynamoRIO standalone decoder and trace readers also compile
-for the host. Replay does not need a Linux VM or an instrumentation runtime.
+Scarab builds as an ARM64 macOS executable and simulates x86 instruction streams
+from existing traces. Intel XED and the DynamoRIO standalone decoder compile
+for the host; replay does not require an instrumentation runtime or Linux VM.
 
-## Prerequisites and build
+The full 59-interval lab campaign passed Linux/native comparison. Read the
+[recorded validation results](validation-results.md) for the tested configuration,
+exact comparison contract, and coverage limits.
 
-Install Xcode Command Line Tools, Python 3, CMake, Boost headers, Snappy, and LZ4.
-With Homebrew, the additional packages are:
+## Prerequisites
+
+- An Apple Silicon Mac, using an ARM64 terminal (`uname -m` should print `arm64`).
+- Xcode Command Line Tools: `xcode-select --install` if not already installed.
+- Git, Python 3.9+, CMake, Boost headers, Snappy, and LZ4.
+- Homebrew packages built for ARM64, normally under `/opt/homebrew`.
 
 ```sh
-brew install cmake boost snappy lz4
-git submodule update --init --recursive
+brew install python cmake boost snappy lz4
+git clone --recurse-submodules https://github.com/darthnithin/scarab.git
+cd scarab
 make -C src -j4 opt
 file src/build/opt/scarab
 ```
 
-The final command must identify a Mach-O ARM64 executable on Apple Silicon.
-The executable is also available through `src/scarab`. The macOS build enables
-`SCARAB_ENABLE_PT_MEMTRACE` by default and skips the Intel Pin tool build.
-Use `make -C src clean` to remove local simulator build products.
+The final command must identify a Mach-O ARM64 executable. The same executable
+is available through `src/scarab`. For an existing checkout, initialize missing
+submodules with `git submodule update --init --recursive` before building.
+The macOS build enables the memtrace frontend by default and skips the Pin tool.
 
-For a separate CMake build directory:
+The four build workers are a starting point; adjust to your machine. Use
+`make -C src clean` only when you intend to remove the simulator build directories
+and `src/scarab` symlink. Simulation results stored elsewhere are unaffected.
+
+## First smoke test
+
+The [README quick start](../README.md#try-it-without-downloading-a-workload)
+generates and runs six small x86/REGDEPS traces in raw, gzip, and ZIP formats.
+It needs no licensed workloads. A successful local smoke run establishes that
+your build can execute those cases; it does not itself perform a Linux comparison.
+
+## Run an existing trace
+
+Use an encoded x86 memtrace compatible with Scarab. Replace `TRACE_FILE` with an
+absolute path. Run the following from the repository root:
+
+```sh
+SCARAB_REPO="$PWD"
+TRACE_FILE=/absolute/path/to/trace.zip
+mkdir -p results/first-trace
+cp src/PARAMS.golden_cove results/first-trace/PARAMS.in
+cd results/first-trace
+"$SCARAB_REPO/src/build/opt/scarab" \
+  --frontend memtrace --cbp_trace_r0="$TRACE_FILE" \
+  --inst_limit=1100000 --full_warmup=100000 --use_fetched_count=1 \
+  > sim.log 2>&1
+```
+
+This requests 100,000 warmup instructions followed by 1,000,000 measured
+instructions. For the full lab configuration, use `--inst_limit=60000000`
+and `--full_warmup=50000000` with the appropriate SimPoint trace. Keep the
+trace, configuration, and limits identical when comparing hosts. Use a fresh
+result directory for each run.
+
+Check the process exit code, the `Scarab finished at` marker in `sim.log`, and
+the recorded instruction counts. The `*.stat.0.csv` files contain both periodic
+and cumulative statistics; use the measured counters for post-warmup analysis.
+Scarab emits raw statistics. Workload weighting and report plots are separate
+postprocessing steps, such as those in the course's Scarab infrastructure.
+
+`PARAMS.in` describes the simulated processor. Choosing Golden Cove does not
+require an Intel host, and the traces are not converted to ARM instructions.
+Traces without embedded encodings may need their matching binaries/module data;
+see [trace formats](memtrace.md).
+
+## Alternative CMake build
 
 ```sh
 cmake -S src -B build/macos \
@@ -31,43 +81,32 @@ cmake -S src -B build/macos \
 cmake --build build/macos --target scarab --parallel 4
 ```
 
-`SCARABOPT` retains Scarab's established assertion behavior; standard CMake
-`Release` also defines `NDEBUG` and is not the equivalent configuration.
-`opt-avx` is specific to an x86 execution host and is rejected on ARM64.
+That executable is `build/macos/scarab`; this route does not create the Makefile's
+`src/scarab` symlink. Substitute its build directory when generating fixtures.
+`SCARABOPT` retains Scarab's assertion behavior. Standard CMake `Release` defines
+`NDEBUG`, so it is not equivalent. `opt-avx` requires an x86 execution host.
 
-CMake locates the macOS SDK for the XED build. It builds XED inside each CMake
-build directory, so native macOS and Linux artifacts cannot overwrite each
-other. Dependencies retain their pinned submodule revisions. The native
-DynamoRIO build uses the upstream standalone decoder and readers, with a small
-host adapter for filesystem queries and decoder support; it does not build
-runtime injection or x86 host assembly.
+CMake locates the macOS SDK and builds XED in each CMake build directory. Keep
+macOS and Linux builds separate. Submodules stay at their pinned revisions; the
+native decoder adapter builds standalone readers, not DynamoRIO injection.
 
-## Run and validate
+## Troubleshooting
 
-Run the executable in a directory containing `PARAMS.in`, using the same trace
-and arguments as the Linux run. Existing encoded x86 trace inputs remain x86;
-there is no conversion to ARM instructions.
+- **Wrong architecture:** check `uname -m`, `file` on the executable, and your
+  package prefix. Reconfigure in a fresh build directory from an ARM64 shell.
+- **Missing SDK:** check `xcode-select -p` and `xcrun --show-sdk-path`; finish the
+  Command Line Tools installation before retrying.
+- **Missing headers or libraries:** install the packages above. For a custom
+  prefix, add `-DCMAKE_PREFIX_PATH=/your/prefix` to the CMake configuration.
+- **Nonempty parity output directory:** choose a new `--output`; existing
+  simulation results are deliberately protected.
+- **Missing or incompatible trace:** confirm the path and trace format. The
+  synthetic smoke test helps separate build problems from workload inputs.
 
-The differential harness records binary architecture, input hashes, parameters,
-exit status, and all simulator statistics. Follow
-[`utils/native_port/README.md`](../utils/native_port/README.md) for the case
-manifest and exact comparison commands. A successful build is not evidence that
-simulation results match: run the Linux and native executables against the same
-inputs and inspect the comparison report.
+## Live programs and Pin
 
-Wall-clock duration, timestamps, host throughput, filesystem paths, and source
-revision identify a particular execution and naturally differ between hosts.
-The comparison report retains those differences separately. Simulated cycles,
-execution time, cache and branch statistics, DRAM results, and instruction counts
-must compare without numerical tolerance. Byte identity is a separate strict
-mode and must not be inferred from numerical equality.
-
-Intel Pin execution-driven tracing, Linux checkpoint launch, and Intel PT
-recording require their existing supported execution environments. A native
-replay executable does not make those instrumentation tools available on ARM64
-macOS; traces collected in the existing Linux workflow remain usable inputs.
-For live execution with the simulator on the Mac and Pin on Linux, see
-[remote Pin execution](remote-pin.md). That path currently supports one core
-and one application thread, with natural and instruction-limited exit checks.
-For live execution with the simulator on the Mac and Intel Pin on a Linux
-compute node, see [the SSH execution frontend](remote-pin.md).
+Native Intel Pin instrumentation on Apple Silicon is not implemented.
+The [experimental remote launcher](remote-pin.md) runs the x86 program and Pin
+on Linux while the simulator runs on the Mac. It requires SSH and Slurm and has
+passed two small single-threaded checks. General application, multicore,
+checkpoint, and native Intel PT recording support are outside that validation.

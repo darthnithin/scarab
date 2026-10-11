@@ -1,22 +1,42 @@
-# Verification Tools
+# Verifying Scarab
 
-Below are a set of resources intended to let you know that Scarab has been installed properly on your system. 
+Choose a check that matches the workflow you intend to use.
 
-In addition, as you modify Scarab for your own research, you may be able to use these tests to verify that Scarab's base functionality has remained unchaged.
+## Native build smoke test
 
-# Sanity Checks
+Follow the [README smoke test](../README.md#try-it-without-downloading-a-workload)
+to generate and run six synthetic trace cases. No course or SPEC traces are
+needed. Check for exit zero and completed output in every case directory.
 
-### **Run QSORT to verify Scarab produces stats similar to golden stat files**
+## Exact Linux/macOS comparison
 
-./utils/qsort includes a small test program for running libc's qsort() on
-random data that we use for sanity checks. To run it, use:
+The [differential harness](../utils/native_port/README.md) runs matching inputs
+on two hosts and compares complete simulator statistics with zero numerical
+tolerance. It retains host timing and metadata differences separately.
 
-> python ./bin/scarab_test_qsort.py path_to_results_directory
-gg
-./utils/qsort/ref_stats includes sample stats that you can use for sanity
-checks. The exact statistics are unlikely to match with the reference stats
-because the produced binary is compiler-dependent.
+The [recorded validation](validation-results.md) includes the full 59-interval
+lab rerun, short regression suites, synthetic trace formats, and two limited
+remote-Pin execution checks. Those results describe the tested binaries and
+inputs; revalidate after changes that could affect simulation behavior.
 
-# Automatic Verification Tools
+For the harness, portable random generator, and socket/relay checks:
 
-Coming Soon!
+```sh
+python3 -m unittest discover -s utils/native_port -p 'test_*.py'
+```
+
+Some tests compile small C/C++ probes, so a working host compiler is required.
+A passing harness test suite is distinct from a workload parity run.
+
+## Legacy Linux execution sanity check
+
+`utils/qsort` contains a small program that sorts random data with libc's
+`qsort()`. With the Linux Pin environment and launcher dependencies configured:
+
+```sh
+python3 bin/scarab_test_qsort.py /path/to/new-results-directory
+```
+
+`utils/qsort/ref_stats` contains historical reference statistics. They may differ
+because the workload binary depends on its compiler. This is not the native
+macOS trace smoke test and does not establish exact cross-host parity.

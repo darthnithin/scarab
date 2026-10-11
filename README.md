@@ -1,77 +1,108 @@
-# Scarab Quick Start Guide
+# Scarab on Apple Silicon
 
-## Apple Silicon macOS
+Run Scarab's x86 microarchitecture simulations natively on an Apple Silicon Mac.
+This fork of [UCSC's Scarab](https://github.com/litz-lab/scarab) adds an ARM64
+macOS build and differential validation against Linux. The simulator runs as a
+native Mac executable; the workload instruction stream remains x86.
 
-This private development branch builds Scarab as a native ARM64 Mac executable
-while simulating the same x86 traces. Follow the [native build guide](docs/native-macos.md)
-and the [exact simulation validation](utils/native_port/README.md).
-For live x86 programs, [remote Pin execution](docs/remote-pin.md) keeps the
-simulator on your Mac and runs Intel Pin on a Linux Slurm compute node.
+**Verified:** all 59 CSE220 Lab 1 SimPoints across 20 SPEC2017 `rate_int_v2`
+workload/input variants were rerun on macOS with 50M warmup + 10M measured
+instructions each. All **1,498,954 compared numeric fields** matched the Linux
+reference with zero tolerance. Host timing and metadata are excluded. See the
+[validation results and scope](docs/validation-results.md).
 
-## Linux
+## Support at a glance
 
-Install:
-1. Install exact PIN version ([PIN 3.15](https://www.intel.com/content/www/us/en/developer/articles/tool/pin-a-binary-instrumentation-tool-downloads.html))
-2. Export the following paths
-  - `export PIN_ROOT=/path/to/pin-3.15`
-  - `export SCARAB_ENABLE_PT_MEMTRACE=1`
-3. `cd src && make`
+| Workflow | Status in this fork |
+| --- | --- |
+| Replay existing x86 memtraces on Apple Silicon | Native ARM64; full 59-interval campaign verified |
+| Generate and replay small synthetic traces locally | Six x86/REGDEPS smoke cases; no course traces needed |
+| Run Scarab and Intel Pin together on x86 Linux | Existing Linux workflow |
+| Mac simulator with Intel Pin on remote x86 Linux | Experimental SSH/Slurm launcher; two single-threaded checks verified |
+| Run Intel Pin natively on Apple Silicon | Not implemented |
+| Native checkpoint restore or Intel PT recording on macOS | Not validated or provided by this port |
 
-Run:
-1. Copy: `src/PARAMS.sunny_cove` into your run directory and rename to `PARAMS.in`
-2. Run: `src/scarab --frontend memtrace --cbp_trace_r0=<MEMTRACE_FILE>`
+Trace replay needs no VM, container, Pin installation, VPN, or remote machine.
+You do need compatible trace files. This repository includes a synthetic trace
+generator; SPEC binaries and course traces are not included.
 
-# Scarab
+## Quick start: macOS
 
-Scarab is a cycle accurate simulator for state-of-the-art, high performance,
-multicore chips. Scarab's goal is to be highly accurate, while also being
-fast and easy to work with.
+Install Xcode Command Line Tools with `xcode-select --install` if needed.
+With Homebrew installed, run:
 
-##### Simulator Features:
-* Accurate: Scarab is detailed cycle accurate uArchitecture model
-* Fast: 600 KIPS trace-driven, 100 KIPS exec-driven
-* SimPoint Support: Checkpoints, Fast-Forward, Marker Instructions
-* Execute-at-Fetch: Easier support for oracle features, faster development of new features
+```sh
+brew install python cmake boost snappy lz4
+git clone --recurse-submodules https://github.com/darthnithin/scarab.git
+cd scarab
+make -C src -j4 opt
+file src/build/opt/scarab
+```
 
-##### v.2.0 Release Features:
-* Support for Dynomrio Memtrace and Intel Processor Trace (PT) frontends
-* Wrong-path execution for trace-based frontends (instruction replay)
+The executable should be reported as `Mach-O 64-bit executable arm64`.
+`src/scarab` is a symlink to the build. Use an ARM64 terminal and ARM64 Homebrew
+packages; the [build guide](docs/native-macos.md) covers troubleshooting and
+alternative build directories.
 
-##### What Code Can Scarab Run?
-* Single-threaded x86\_64 programs that can be run on Intel's [PIN](https://software.intel.com/en-us/articles/pin-a-dynamic-binary-instrumentation-tool)
+### Try it without downloading a workload
 
-##### Scarab uArchitecture:
-* All typical pipeline stages and out-of-order structures (Fetch, Decode, Rename, Retire, ROB, R/S, and more...)
-* Multicore 
-* Wrong path simulation
-* Cache Hierarchy (Private L1, Private MLC, Private/Shared LLC)
-* Ramulator Memory Simulator (DDR3/4, LPDDR3/4, GDDR5, HBM, WideIO/2, and more...)  
-* Interface to McPat and CACTI for system level power/energy modeling
-* Support for DVFS
-* Latest Branch Predictors and Data Prefetchers (TAGE-SC-L, Stride, Stream, 2dc, GHB, Markov, and more...)
+From the repository root, generate six small traces and run them:
 
-##### v.2.0 uArchitecture Extensions:
-* Decoupled Frontend
-* Micro-op Cache
-* Register Renaming (limited GRF/rename stalls)
-* Updated branch predictor and increased recovery accuracy
-* FDIP/UDP prefetcher
+```sh
+python3 utils/native_port/trace_fixtures.py --build-dir src/build/opt
+python3 utils/native_port/parity.py run \
+  --manifest build/native-trace-fixtures/suite.json \
+  --binary src/build/opt/scarab --params src/PARAMS.golden_cove \
+  --trace-root build/native-trace-fixtures --output results/macos-smoke
+```
 
-##### Code Limitations
-* 32-bit binaries not supported (work in progress)
-* Performance of System Code not modeled
-* No cooperative multithreaded code
+Each case prints `exit=0` on success. Its directory under `results/macos-smoke`
+contains `sim.log`, `PARAMS.in`, `PARAMS.out`, statistics, and `parity-run.json`.
+Choose a new output directory when rerunning: the runner protects existing
+results. This is a local smoke test; a Linux/native comparison requires both
+result sets and the [parity checks](utils/native_port/README.md).
 
-##### uArch Limitations
-* No SMT
-* No real OS virtual to physical address translation
-* Shared bus interconnect only (ring, mesh, and others are in progress.)
+### Run your own trace
 
-##### Credits 
-Scarab was created in collaboration with HPS and SAFARI. This project was sponsored by Intel Labs.
-Scarab v.2.0 was created and is currently maintained by UCSC.
+See [running a memtrace](docs/native-macos.md#run-an-existing-trace) for a complete
+command, including the parameter file and instruction limits. The architecture
+in `PARAMS.in` describes the simulated processor, not the Mac's CPU.
 
-The Scarab v.2.0 artifact is the result of our UDP ISCA 2024 paper. If you are using Scarab v.2.0 in your research please cite:
+## Documentation
+
+- [Native macOS build and first simulation](docs/native-macos.md)
+- [System requirements](docs/system_requirements.md) and [Linux builds](docs/compiling-scarab.md)
+- [Trace formats and replay](docs/memtrace.md)
+- [Verification](docs/verification.md), [recorded results](docs/validation-results.md), and [differential harness](utils/native_port/README.md)
+- [Experimental remote Pin execution](docs/remote-pin.md)
+- [Linux execution-driven simulations](docs/running-scarab.md)
+- [Troubleshooting](docs/common-problems.md)
+
+## About Scarab
+
+Scarab is a cycle-accurate simulator for out-of-order x86 processors. It models
+fetch, decode, rename, scheduling and retirement, speculative execution,
+branch prediction, prefetching, caches, and DRAM through Ramulator. It supports
+SimPoints and configurable microarchitectures, including the Golden Cove
+configuration used in this fork's validation.
+
+The native port does not extend the simulated ISA to ARM. The validation here
+also does not establish every optional feature or multicore configuration.
+Scarab's broader limitations include no SMT, no modeled system-code performance,
+and no full OS virtual-to-physical address translation.
+
+For problems with this fork, [open an issue here](https://github.com/darthnithin/scarab/issues).
+Include the source revision, host architecture, build command, configuration,
+and a small reproducer where possible. Contributions can be proposed through
+[this fork's pull requests](https://github.com/darthnithin/scarab/pulls).
+
+## Credits and citation
+
+Scarab was created by HPS and SAFARI with sponsorship from Intel Labs. Scarab
+v2.0 and the underlying simulator work come from UCSC and the upstream project.
+This is an independent fork adding macOS portability and validation tooling.
+
+If you use Scarab v2.0 in research, retain the upstream citation:
 
 ```
 @inproceedings{oh2024udp,
@@ -84,32 +115,7 @@ The Scarab v.2.0 artifact is the result of our UDP ISCA 2024 paper. If you are u
 }
 ```
 
-## License & Copyright
-Please see the [LICENSE](LICENSE) for more information.
+## License
 
-## Getting Started
-
-1. [System requirements and software prerequisites.](docs/system_requirements.md)
-2. [Compiling Scarab.](docs/compiling-scarab.md)
-3. [Setting up and running auto-verification on Scarab.](docs/verification.md)
-4. Running a single program on Scarab.
-5. Running multiple jobs locally or on a batch system. (coming soon!)
-6. Viewing batch job status and results. (coming soon!)
-7. [Simulating dynamorio memtraces](docs/memtrace.md)
-8. Solutions to common Scarab problems.
-
-## Contributing to Scarab
-
-Found a bug? [File a bug report.](https://github.com/hpsresearchgroup/scarab/issues/new/choose)
-
-Request a new feature? [File a feature request.](https://github.com/hpsresearchgroup/scarab/issues/new/choose)
-
-Have code you would like to commit? [Create a pull request.](https://github.com/hpsresearchgroup/scarab/pulls)
-
-## Other Resources
-
-
-1) Auto-generated software documentation can be found [here](docs/doxygen/index.html).
-
-* Please run this command in this directory to auto-generate documentation files.
-> make -C docs
+See [LICENSE](LICENSE) for the simulator's license and copyright notices.
+Third-party dependencies retain their own licenses.

@@ -1,0 +1,597 @@
+{
+  "schema_version": 1,
+  "description": "Full 59-interval SPEC2017 rate_int_v2 regression: 20 workload/input variants, 50M warmup plus 10M measured instructions per interval.",
+  "cases": [
+    {
+      "name": "perlbench_r/109678",
+      "trace": "perlbench_r/109678.zip",
+      "source_size_bytes": 63485935,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "perlbench_r/67197",
+      "trace": "perlbench_r/67197.zip",
+      "source_size_bytes": 81750735,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "perlbench_r/52790",
+      "trace": "perlbench_r/52790.zip",
+      "source_size_bytes": 47668770,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "perlbench_r_2/45284",
+      "trace": "perlbench_r_2/45284.zip",
+      "source_size_bytes": 73960071,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "perlbench_r_2/55827",
+      "trace": "perlbench_r_2/55827.zip",
+      "source_size_bytes": 83968761,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "perlbench_r_2/43154",
+      "trace": "perlbench_r_2/43154.zip",
+      "source_size_bytes": 45016646,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "perlbench_r_3/12723",
+      "trace": "perlbench_r_3/12723.zip",
+      "source_size_bytes": 50198611,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "perlbench_r_3/51347",
+      "trace": "perlbench_r_3/51347.zip",
+      "source_size_bytes": 51389558,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "perlbench_r_3/67123",
+      "trace": "perlbench_r_3/67123.zip",
+      "source_size_bytes": 105256001,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r/17210",
+      "trace": "gcc_r/17210.zip",
+      "source_size_bytes": 106153039,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r/18096",
+      "trace": "gcc_r/18096.zip",
+      "source_size_bytes": 110369103,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r/2258",
+      "trace": "gcc_r/2258.zip",
+      "source_size_bytes": 125276212,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_2/2707",
+      "trace": "gcc_r_2/2707.zip",
+      "source_size_bytes": 124579192,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_2/20812",
+      "trace": "gcc_r_2/20812.zip",
+      "source_size_bytes": 117342875,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_2/10399",
+      "trace": "gcc_r_2/10399.zip",
+      "source_size_bytes": 160425896,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_3/2198",
+      "trace": "gcc_r_3/2198.zip",
+      "source_size_bytes": 62322932,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_3/14493",
+      "trace": "gcc_r_3/14493.zip",
+      "source_size_bytes": 114246158,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_3/9591",
+      "trace": "gcc_r_3/9591.zip",
+      "source_size_bytes": 106445488,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_4/7196",
+      "trace": "gcc_r_4/7196.zip",
+      "source_size_bytes": 46043938,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_4/1886",
+      "trace": "gcc_r_4/1886.zip",
+      "source_size_bytes": 100977290,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_4/1754",
+      "trace": "gcc_r_4/1754.zip",
+      "source_size_bytes": 112875170,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_5/2025",
+      "trace": "gcc_r_5/2025.zip",
+      "source_size_bytes": 126128223,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_5/1956",
+      "trace": "gcc_r_5/1956.zip",
+      "source_size_bytes": 121965121,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "gcc_r_5/2083",
+      "trace": "gcc_r_5/2083.zip",
+      "source_size_bytes": 105136432,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "mcf_r/85716",
+      "trace": "mcf_r/85716.zip",
+      "source_size_bytes": 63532197,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1",
+        "None"
+      ]
+    },
+    {
+      "name": "mcf_r/93581",
+      "trace": "mcf_r/93581.zip",
+      "source_size_bytes": 37100891,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "mcf_r/19408",
+      "trace": "mcf_r/19408.zip",
+      "source_size_bytes": 72421782,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "omnetpp_r/89111",
+      "trace": "omnetpp_r/89111.zip",
+      "source_size_bytes": 175929956,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "omnetpp_r/2420",
+      "trace": "omnetpp_r/2420.zip",
+      "source_size_bytes": 164863964,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xalancbmk_r/14116",
+      "trace": "xalancbmk_r/14116.zip",
+      "source_size_bytes": 45096565,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xalancbmk_r/104011",
+      "trace": "xalancbmk_r/104011.zip",
+      "source_size_bytes": 118644456,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xalancbmk_r/44066",
+      "trace": "xalancbmk_r/44066.zip",
+      "source_size_bytes": 124970400,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "x264_r/35371",
+      "trace": "x264_r/35371.zip",
+      "source_size_bytes": 73545342,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "x264_r/11255",
+      "trace": "x264_r/11255.zip",
+      "source_size_bytes": 75051675,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "x264_r/12295",
+      "trace": "x264_r/12295.zip",
+      "source_size_bytes": 76144805,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "x264_r_2/98383",
+      "trace": "x264_r_2/98383.zip",
+      "source_size_bytes": 78812551,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "x264_r_2/104659",
+      "trace": "x264_r_2/104659.zip",
+      "source_size_bytes": 73576210,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "x264_r_2/45590",
+      "trace": "x264_r_2/45590.zip",
+      "source_size_bytes": 74778098,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "x264_r_3/194540",
+      "trace": "x264_r_3/194540.zip",
+      "source_size_bytes": 76344855,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "x264_r_3/175247",
+      "trace": "x264_r_3/175247.zip",
+      "source_size_bytes": 80170790,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "x264_r_3/33181",
+      "trace": "x264_r_3/33181.zip",
+      "source_size_bytes": 68329142,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "deepsjeng_r/50298",
+      "trace": "deepsjeng_r/50298.zip",
+      "source_size_bytes": 133392848,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "deepsjeng_r/41830",
+      "trace": "deepsjeng_r/41830.zip",
+      "source_size_bytes": 145272546,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "deepsjeng_r/3284",
+      "trace": "deepsjeng_r/3284.zip",
+      "source_size_bytes": 138010067,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "leela_r/148156",
+      "trace": "leela_r/148156.zip",
+      "source_size_bytes": 97075721,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "leela_r/207092",
+      "trace": "leela_r/207092.zip",
+      "source_size_bytes": 97312512,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "leela_r/42427",
+      "trace": "leela_r/42427.zip",
+      "source_size_bytes": 95550008,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "exchange2_r/141811",
+      "trace": "exchange2_r/141811.zip",
+      "source_size_bytes": 85228648,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "exchange2_r/41002",
+      "trace": "exchange2_r/41002.zip",
+      "source_size_bytes": 81577115,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "exchange2_r/30781",
+      "trace": "exchange2_r/30781.zip",
+      "source_size_bytes": 74223947,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xz_r/20105",
+      "trace": "xz_r/20105.zip",
+      "source_size_bytes": 55434409,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xz_r/5933",
+      "trace": "xz_r/5933.zip",
+      "source_size_bytes": 53994333,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xz_r/2726",
+      "trace": "xz_r/2726.zip",
+      "source_size_bytes": 51863807,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xz_r_2/40606",
+      "trace": "xz_r_2/40606.zip",
+      "source_size_bytes": 56203113,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xz_r_2/28352",
+      "trace": "xz_r_2/28352.zip",
+      "source_size_bytes": 54475924,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xz_r_2/2443",
+      "trace": "xz_r_2/2443.zip",
+      "source_size_bytes": 49797373,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xz_r_3/34685",
+      "trace": "xz_r_3/34685.zip",
+      "source_size_bytes": 60021305,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xz_r_3/36264",
+      "trace": "xz_r_3/36264.zip",
+      "source_size_bytes": 62854350,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    },
+    {
+      "name": "xz_r_3/51271",
+      "trace": "xz_r_3/51271.zip",
+      "source_size_bytes": 84847823,
+      "args": [
+        "--inst_limit=60000000",
+        "--full_warmup=50000000",
+        "--use_fetched_count=1"
+      ]
+    }
+  ]
+}

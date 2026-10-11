@@ -1,4 +1,8 @@
-# Running A Single Program on Scarab
+# Running a live program on Linux
+
+This page describes the legacy Linux/Intel Pin launcher. For native Mac trace
+replay, use the [macOS guide](native-macos.md). For a native Mac simulator with
+Pin on Linux, use the [experimental remote launcher](remote-pin.md).
 
 ## Running QSORT
 
