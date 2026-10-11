@@ -79,7 +79,7 @@ help-nocolor: ## Print this message
 # We tried to make this a phony target, but it did not work. We suspect phony
 # targets cannot be file paths.
 $(BUILD_DIR_PREFIX)/%/scarab_phony: $(BUILD_DIR_PREFIX)/%/Makefile gitrev pin_exec
-	@make -j --no-print-directory -C $(dir $@)
+	+@$(MAKE) --no-print-directory -C $(dir $@)
 	ln -sf $(dir $@)scarab scarab
 
 # Creates the build directory and configures the CMake project.
