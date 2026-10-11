@@ -54,6 +54,9 @@ extern "C" {
 
 Server* server;
 std::vector<ScarabOpBuffer_type> cached_cop_buffers;
+// sim.c clears retired_exit for completed non-trace cores. Remember the actual
+// Pin shutdown command separately so frontend_done does not send it twice.
+std::vector<bool> final_retire_sent;
 
 void get_next_op_buffer_from_pin(uns proc_id);
 void update_op_buffer_if_empty(uns proc_id);
@@ -93,13 +96,14 @@ Addr get_fetch_address(uns proc_id, compressed_op* cop) {
 void pin_exec_driven_init(uns numProcs) {
   server = new Server(PIN_EXEC_DRIVEN_FE_SOCKET, numProcs);
   cached_cop_buffers.resize(numProcs);
+  final_retire_sent.assign(numProcs, false);
   uop_generator_init(numProcs);
 }
 
 void pin_exec_driven_done(Flag* retired_exit) {
   // Send final exit message, telling client to stop running.
   for (uint32_t i = 0; i < server->getNumClients(); ++i) {
-    if (!retired_exit[i]) {
+    if (!retired_exit[i] && !final_retire_sent[i]) {
       pin_exec_driven_retire(i, -1);
     }
   }
@@ -194,5 +198,7 @@ void pin_exec_driven_retire(uns proc_id, uns64 inst_uid) {
   msg.inst_uid = inst_uid;
 
   server->send(proc_id, (Message<Scarab_To_Pin_Msg>)msg);  // blocking
+  if (inst_uid == (uns64)-1)
+    final_retire_sent[proc_id] = true;
   DEBUG(proc_id, "Fetch Retire end: %llu\n", inst_uid);
 }
