@@ -66,5 +66,8 @@ Intel Pin execution-driven tracing, Linux checkpoint launch, and Intel PT
 recording require their existing supported execution environments. A native
 replay executable does not make those instrumentation tools available on ARM64
 macOS; traces collected in the existing Linux workflow remain usable inputs.
+For live execution with the simulator on the Mac and Pin on Linux, see
+[remote Pin execution](remote-pin.md). That path currently supports one core
+and one application thread, with natural and instruction-limited exit checks.
 For live execution with the simulator on the Mac and Intel Pin on a Linux
 compute node, see [the SSH execution frontend](remote-pin.md).

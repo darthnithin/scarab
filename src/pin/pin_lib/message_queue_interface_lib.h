@@ -23,7 +23,6 @@
 #define __MESSAGE_QUEUE_INTERFACE_LIB_H__
 
 extern "C" {
-#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/socket.h>
@@ -171,24 +170,30 @@ Message<std::vector<T>>& Message<std::vector<T>>::operator=(
 
 template <typename T>
 Message<std::vector<T>>::operator std::vector<T>() const {
+  assertm(data_size % sizeof(T) == 0, "Incomplete vector element in message");
   uint32_t       size_of_vector = data_size / sizeof(T);
   std::vector<T> object(size_of_vector);
 
   for(uint32_t i = 0; i < size_of_vector; ++i) {
     uint32_t start_idx = i * sizeof(T);
     uint32_t stop_idx  = (i + 1) * sizeof(T);
-    std::copy(&data[start_idx], &data[stop_idx], (char*)&object[i]);
+    std::copy(data.begin() + start_idx, data.begin() + stop_idx,
+              (char*)&object[i]);
   }
   return object;
 }
 
 template <typename T>
 void Message<std::vector<T>>::copy(const std::vector<T>& object) {
+  assertm(object.size() <= MAX_PACKET_SIZE / sizeof(T),
+          "Vector message exceeds MAX_PACKET_SIZE");
   data_size = object.size() * sizeof(T);
   assertm(data_size <= MAX_PACKET_SIZE, "Scarab does not currently support "
                                         "sending messages larger than "
                                         "MAX_PACKET_SIZE.\n");
 
+  data.clear();
+  data.reserve(data_size);
   for(uint32_t i = 0; i < object.size(); ++i) {
     char* object_ptr = (char*)&object[i];
     data.insert(data.end(), object_ptr, object_ptr + sizeof(T));
@@ -212,24 +217,30 @@ Message<std::deque<T>>& Message<std::deque<T>>::operator=(
 
 template <typename T>
 Message<std::deque<T>>::operator std::deque<T>() const {
+  assertm(data_size % sizeof(T) == 0, "Incomplete deque element in message");
   uint32_t      size_of_deque = data_size / sizeof(T);
   std::deque<T> object(size_of_deque);
 
   for(uint32_t i = 0; i < size_of_deque; ++i) {
     uint32_t start_idx = i * sizeof(T);
     uint32_t stop_idx = (i + 1) * sizeof(T);
-    std::copy(&data[start_idx], &data[stop_idx], (char*)&object[i]);
+    std::copy(data.begin() + start_idx, data.begin() + stop_idx,
+              (char*)&object[i]);
   }
   return object;
 }
 
 template <typename T>
 void Message<std::deque<T>>::copy(const std::deque<T>& object) {
+  assertm(object.size() <= MAX_PACKET_SIZE / sizeof(T),
+          "Deque message exceeds MAX_PACKET_SIZE");
   data_size = object.size() * sizeof(T);
   assertm(data_size <= MAX_PACKET_SIZE, "Scarab does not currently support "
                                         "sending messages larger than "
                                         "MAX_PACKET_SIZE.\n");
 
+  data.clear();
+  data.reserve(data_size);
   for (const T& elem : object) {
     const char* object_ptr = reinterpret_cast<const char*>(&elem);
     data.insert(data.end(), object_ptr, object_ptr + sizeof(T));
@@ -254,6 +265,13 @@ class TCPSocket {
 
   std::string server_init_message;
   std::string client_init_message;
+
+  // Opt-in framing is required for SSH relays, which may split or combine
+  // writes. Both endpoints must set SCARAB_SOCKET_PROTOCOL=framed-v1.
+  bool framed_messages = false;
+  void send_bytes(SocketDescriptor socket, const char* data, size_t size);
+  void receive_bytes(SocketDescriptor socket, char* data, size_t size);
+  std::vector<char> receive_frame(SocketDescriptor socket);
 
   void send(SocketDescriptor socket, const std::vector<char>* msg);
 

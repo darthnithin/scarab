@@ -1,4 +1,15 @@
 # Scarab Quick Start Guide
+
+## Apple Silicon macOS
+
+This private development branch builds Scarab as a native ARM64 Mac executable
+while simulating the same x86 traces. Follow the [native build guide](docs/native-macos.md)
+and the [exact simulation validation](utils/native_port/README.md).
+For live x86 programs, [remote Pin execution](docs/remote-pin.md) keeps the
+simulator on your Mac and runs Intel Pin on a Linux Slurm compute node.
+
+## Linux
+
 Install:
 1. Install exact PIN version ([PIN 3.15](https://www.intel.com/content/www/us/en/developer/articles/tool/pin-a-binary-instrumentation-tool-downloads.html))
 2. Export the following paths

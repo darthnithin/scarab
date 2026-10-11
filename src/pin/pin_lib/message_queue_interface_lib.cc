@@ -21,6 +21,8 @@
 
 
 #include "message_queue_interface_lib.h"
+#include <errno.h>
+#include <string.h>
 
 extern "C" {}
 
@@ -88,6 +90,11 @@ const std::vector<char>* MessageBase::get_raw_data() const {
  *******************************************************************************************/
 
 TCPSocket::TCPSocket() {
+  const char* protocol = getenv("SCARAB_SOCKET_PROTOCOL");
+  assertm(!protocol || !strcmp(protocol, "legacy") ||
+            !strcmp(protocol, "framed-v1"),
+          "SCARAB_SOCKET_PROTOCOL must be legacy or framed-v1");
+  framed_messages = protocol && !strcmp(protocol, "framed-v1");
   server_init_message   = "Server Init Message";
   client_init_message   = "Client Init Message";
   socket_address_length = sizeof(socket_address);
@@ -100,29 +107,63 @@ TCPSocket::~TCPSocket() {
 
 void TCPSocket::send(SocketDescriptor         socket,
                      const std::vector<char>* message) {
-  uint32_t total_bytes_sent = 0;
-  int32_t  failure;
-  char*    buffer = (char*)&(
-    *message)[0]; /*CPP guuarantees vector stored in contiguous memory*/
   assertm(message->size() <= RECEIVE_BUFFER_MAX_SIZE,
-          "Need to allocation more space in the send buffer");
+          "Message exceeds the send buffer");
+  if(framed_messages) {
+    const uint32_t size = message->size();
+    // Fixed network-order length; payload retains Scarab's little-endian,
+    // packed x86-64 ABI, which is also used by native ARM64 macOS.
+    const char header[8] = {'S', 'C', 'B', '1', (char)(size >> 24),
+                            (char)(size >> 16), (char)(size >> 8), (char)size};
+    send_bytes(socket, header, sizeof(header));
+  }
+  send_bytes(socket, message->data(), message->size());
+}
 
-  do {
-    do {
-      failure = ::send(socket, buffer, (int32_t)message->size(), 0);
-    } while(failure < 0 && (errno == EWOULDBLOCK || errno == EAGAIN));
+void TCPSocket::send_bytes(SocketDescriptor socket, const char* data,
+                           size_t size) {
+  size_t offset = 0;
+  while(offset < size) {
+    const ssize_t count = ::send(socket, data + offset, size - offset, 0);
+    if(count < 0 && (errno == EINTR || errno == EWOULDBLOCK || errno == EAGAIN))
+      continue;
+    CHECK_FOR_FAILURE(count <= 0, "Send Failed");
+    offset += count;
+  }
+}
 
-    CHECK_FOR_FAILURE(failure < 0, "Send Failed");
-    total_bytes_sent += failure;
-  } while(total_bytes_sent < message->size());
+void TCPSocket::receive_bytes(SocketDescriptor socket, char* data, size_t size) {
+  size_t offset = 0;
+  while(offset < size) {
+    // PinCRT exports read(), but not recv(). Both read socket streams here.
+    const ssize_t count = read(socket, data + offset, size - offset);
+    if(count < 0 && (errno == EINTR || errno == EWOULDBLOCK || errno == EAGAIN))
+      continue;
+    CHECK_FOR_FAILURE(count < 0, "Receive Failed");
+    assertm(count != 0, "Socket closed before a complete message arrived");
+    offset += count;
+  }
+}
 
-  CHECK_FOR_FAILURE(total_bytes_sent != message->size(),
-                    "TCPSocket Send did not send the correct number of bytes!")
+std::vector<char> TCPSocket::receive_frame(SocketDescriptor socket) {
+  unsigned char header[8];
+  receive_bytes(socket, reinterpret_cast<char*>(header), sizeof(header));
+  assertm(!memcmp(header, "SCB1", 4),
+          "Socket protocol mismatch: both endpoints need framed-v1");
+  const uint32_t size = (uint32_t(header[4]) << 24) |
+                       (uint32_t(header[5]) << 16) |
+                       (uint32_t(header[6]) << 8) | uint32_t(header[7]);
+  assertm(size <= RECEIVE_BUFFER_MAX_SIZE, "Socket frame exceeds MAX_PACKET_SIZE");
+  std::vector<char> message(size);
+  receive_bytes(socket, message.data(), size);
+  return message;
 }
 
 #if !defined(PIN_COMPILE) || defined(GTEST_COMPILE)
 
 std::vector<char> TCPSocket::scarab_receive(SocketDescriptor socket) {
+  if(framed_messages)
+    return receive_frame(socket);
   char    buffer[RECEIVE_BUFFER_MAX_SIZE];
   int32_t bytes_recv;
 
@@ -131,9 +172,8 @@ std::vector<char> TCPSocket::scarab_receive(SocketDescriptor socket) {
     CHECK_FOR_FAILURE(
       bytes_recv == 0,
       "Socket closed unepectedly on read. PIN process probably died.");
-    if(bytes_recv < 0)
-      perror("ERRNO: ");
-  } while(bytes_recv < 0 && (errno == EWOULDBLOCK || errno == EAGAIN));
+  } while(bytes_recv < 0 &&
+          (errno == EINTR || errno == EWOULDBLOCK || errno == EAGAIN));
 
   CHECK_FOR_FAILURE(bytes_recv < 0, "Receive Failed");
 
@@ -147,6 +187,11 @@ std::vector<char> TCPSocket::scarab_receive(SocketDescriptor socket) {
 
 std::vector<char> TCPSocket::pin_receive(SocketDescriptor socket,
                                          uint32_t         num_bytes_recv) {
+  if(framed_messages) {
+    std::vector<char> message = receive_frame(socket);
+    assertm(message.size() == num_bytes_recv, "Socket frame has unexpected size");
+    return message;
+  }
   char    buffer[RECEIVE_BUFFER_MAX_SIZE];
   int32_t bytes_recv = 0;
 
@@ -154,12 +199,14 @@ std::vector<char> TCPSocket::pin_receive(SocketDescriptor socket,
     do {
       bytes_recv = read(socket, buffer, RECEIVE_BUFFER_MAX_SIZE);
       CHECK_FOR_FAILURE(
-        bytes_recv < 0 && (errno != EWOULDBLOCK && errno != EAGAIN),
+        bytes_recv < 0 &&
+          (errno != EINTR && errno != EWOULDBLOCK && errno != EAGAIN),
         "Receive Failed (pin_receive)");
       CHECK_FOR_FAILURE(
         bytes_recv == 0,
         "Socket closed unexpectedly on read. Scarab process probably died.");
-    } while(bytes_recv < 0 && (errno == EWOULDBLOCK || errno == EAGAIN));
+    } while(bytes_recv < 0 &&
+            (errno == EINTR || errno == EWOULDBLOCK || errno == EAGAIN));
 
     receive_buffer.insert(receive_buffer.end(), buffer, buffer + bytes_recv);
   }
@@ -208,10 +255,12 @@ void TCPSocket::create_socket_file_descriptor() {
    * protocol. Should choose TCP.
    */
   socket_fd = socket(AF_UNIX, SOCK_STREAM, 0);
-  CHECK_FOR_FAILURE(socket_fd == 0, "Socket Failed");
+  CHECK_FOR_FAILURE(socket_fd < 0, "Socket Failed");
 }
 
 void TCPSocket::setup_unix_sockaddr_struct() {
+  assertm(socket_path.size() < sizeof(socket_address.sun_path),
+          "Unix socket path is too long");
   socket_address.sun_family = AF_UNIX;
   strcpy(socket_address.sun_path, socket_path.c_str());
 }
@@ -326,7 +375,7 @@ void Server::get_requested_client_id(uint32_t current_client_id) {
 void Server::wait_for_client_to_close(uint32_t client_id) {
 #if !defined(PIN_COMPILE) || defined(GTEST_COMPILE)
   char     buffer[RECEIVE_BUFFER_MAX_SIZE];
-  uint32_t bytes_recv = recv(client_fds[client_id], buffer, sizeof(buffer),
+  ssize_t bytes_recv = recv(client_fds[client_id], buffer, sizeof(buffer),
                              MSG_PEEK);
   CHECK_FOR_FAILURE(bytes_recv < 0,
                     "wait_for_client_to_close failed due to an error");
@@ -351,6 +400,7 @@ void Server::verify_and_assign_requested_client_ids(uint32_t numClients) {
     uint32_t requested_id = requested_client_ids[i] == max_unsigned_int ?
                               i :
                               requested_client_ids[i];
+    assertm(requested_id < numClients, "Client requested an invalid core id");
     assertm(temp_client_fds[requested_id] == (SocketDescriptor)max_unsigned_int,
             "Two or more clients requested the same id");
     temp_client_fds[requested_id] = client_fds[i];
