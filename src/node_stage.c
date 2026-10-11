@@ -50,6 +50,7 @@
 #include "bp/tagescl.h"
 #include "frontend/frontend.h"
 #include "memory/memory.h"
+#include "isa/isa.h"
 
 #include "decoupled_frontend.h"
 #include "exec_ports.h"

@@ -1,4 +1,6 @@
-CMAKE = $(shell which cmake3 || which cmake)
+CMAKE ?= $(shell command -v cmake3 2>/dev/null || command -v cmake 2>/dev/null)
+CMAKE_ARGS ?=
+HOST_OS := $(shell uname -s)
 GITREV = $(shell git rev-parse --short HEAD)
 SRCPWD = $(shell pwd)
 
@@ -15,6 +17,15 @@ endif
 CXX ?= g++
 
 TARGETS := opt opt-avx dbg vgr gpf
+# Intel Pin executes x86 Linux applications. Trace simulation has no Pin runtime
+# dependency and is the native macOS frontend.
+PIN_PREREQUISITE := pin_exec
+PIN_CLEAN_PREREQUISITE := clean_pin_exec
+ifeq ($(HOST_OS),Darwin)
+PIN_PREREQUISITE :=
+PIN_CLEAN_PREREQUISITE :=
+TARGETS := opt dbg vgr
+endif
 
 .PHONY: all default clean clean_pin_exec pin_exec $(TARGETS) $(subst %, clean%, $(TARGETS))
 
@@ -23,7 +34,7 @@ default: opt
 all: $(TARGETS)
 
 opt: BUILD_TYPE = SCARABOPT
-opt: $(BUILD_DIR_PREFIX)/opt/scarab_phony ## Build Scarab optimized (-O3 -g3), portable x86-64 (no -march)
+opt: $(BUILD_DIR_PREFIX)/opt/scarab_phony ## Build Scarab optimized (-O3 -g3), portable native host code (no -march)
 
 opt-avx: BUILD_TYPE = OPT_AVX
 opt-avx: $(BUILD_DIR_PREFIX)/opt-avx/scarab_phony ## Same as opt with -march=haswell (256-bit AVX2; runs on Intel and AMD)
@@ -38,16 +49,23 @@ gpf: BUILD_TYPE := Gprof
 gpf: $(BUILD_DIR_PREFIX)/gpf/scarab_phony ## Build Scarab in Gprof mode
 
 pin_exec:
+ifeq ($(HOST_OS),Darwin)
+	@echo "Intel Pin execution requires x86 Linux; use the native memtrace frontend on macOS." >&2
+	@exit 1
+else
 	make SCARAB_DIR=$(SRCPWD) pin_exec --directory pin/pin_exec	 --no-print-directory
+endif
 
 clean_pin_exec:
-	make --directory pin/pin_exec clean --no-print-directory
+ifneq ($(HOST_OS),Darwin)
+	$(MAKE) --directory pin/pin_exec clean --no-print-directory
+endif
 
 clean%: ## Clean a specific build directory
 	rm -rf build/$*
 	rm -f scarab
 
-clean: clean_pin_exec ## Clean all build directories
+clean: $(PIN_CLEAN_PREREQUISITE) ## Clean all build directories
 	rm -rf build/
 	rm -f scarab
 
@@ -78,7 +96,7 @@ help-nocolor: ## Print this message
 # scarab_phony is a fake file that causes this rule to always run.
 # We tried to make this a phony target, but it did not work. We suspect phony
 # targets cannot be file paths.
-$(BUILD_DIR_PREFIX)/%/scarab_phony: $(BUILD_DIR_PREFIX)/%/Makefile gitrev pin_exec
+$(BUILD_DIR_PREFIX)/%/scarab_phony: $(BUILD_DIR_PREFIX)/%/Makefile gitrev $(PIN_PREREQUISITE)
 	+@$(MAKE) --no-print-directory -C $(dir $@)
 	ln -sf $(dir $@)scarab scarab
 
@@ -93,4 +111,4 @@ $(BUILD_DIR_PREFIX)/%/Makefile:
 	  CC=$(CC)      \
 	  CXX=$(CXX)     \
 	  ASM=$(AS)   \
-	  $(CMAKE) ../.. -DCMAKE_BUILD_TYPE=$(BUILD_TYPE)
+	  $(CMAKE) ../.. -DCMAKE_BUILD_TYPE=$(BUILD_TYPE) $(CMAKE_ARGS)

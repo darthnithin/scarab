@@ -68,3 +68,6 @@ test_string_pinball/
 .vscode/*
 *.code-workspace
 .env
+
+# Local native build tool environment
+.build-tools/

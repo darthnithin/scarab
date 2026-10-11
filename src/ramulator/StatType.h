@@ -23,6 +23,7 @@
 #define __STATTYPE_H
 
 #include <limits>
+#include <cstdint>
 #include <fstream>
 #include <string>
 #include <vector>

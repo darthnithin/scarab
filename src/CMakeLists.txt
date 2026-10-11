@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(scarab C CXX ASM)
+project(scarab C CXX)
 
 # Always emit build/<mode>/compile_commands.json. Consumed by:
 #   - clangd / VS Code / any LSP-based editor for accurate include resolution.
@@ -16,31 +16,34 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(flags_enable_pt_memtrace "")
-
-if(DEFINED ENV{SCARAB_ENABLE_PT_MEMTRACE})
-  set(flags_enable_pt_memtrace "-DENABLE_PT_MEMTRACE")
+# The modeled ISA is x86-64 even when the simulator itself runs on ARM64.
+# Do not put modeled-ISA or platform definitions in global compiler flags:
+# DynamoRIO separately configures its execution host and decoding target.
+if(APPLE)
+  set(_scarab_memtrace_default ON)
+else()
+  set(_scarab_memtrace_default OFF)
 endif()
+if(DEFINED ENV{SCARAB_ENABLE_PT_MEMTRACE})
+  set(_scarab_memtrace_default ON)
+endif()
+option(SCARAB_ENABLE_PT_MEMTRACE "Build the processor/memory trace frontend"
+       ${_scarab_memtrace_default})
 
-# SCARABOPT: -O3 portable x86-64 (make opt). OPT_AVX: same + -march=haswell (make opt-avx).
-#
-# OPT_AVX targets haswell (256-bit AVX2, FMA, BMI2) rather than skylake-avx512.
-# -march=skylake-avx512 emits AVX-512 instructions, so the resulting binary dies
-# with SIGILL ("Illegal instruction") on any host without AVX-512 -- including all
-# AMD Zen hosts. haswell is the widest baseline that every x86-64 machine from
-# Haswell/Zen1 onward can execute, which keeps one build usable across a
-# heterogeneous cluster instead of silently restricting it to Intel nodes.
-set(CMAKE_C_FLAGS_SCARABOPT "-O3 -g3 -DNO_DEBUG -DLINUX -DX86_64 ${flags_enable_pt_memtrace}")
-set(CMAKE_CXX_FLAGS_SCARABOPT "-O3 -g3 -DNO_DEBUG -DLINUX -DX86_64 ${flags_enable_pt_memtrace}")
-set(CMAKE_C_FLAGS_OPT_AVX "-O3 -g3 -march=haswell -DNO_DEBUG -DLINUX -DX86_64 ${flags_enable_pt_memtrace}")
-set(CMAKE_CXX_FLAGS_OPT_AVX "-O3 -g3 -march=haswell -DNO_DEBUG -DLINUX -DX86_64 ${flags_enable_pt_memtrace}")
-
-set(CMAKE_C_FLAGS_VALGRIND    "-O0 -g3 -DLINUX -DX86_64 ${flags_enable_pt_memtrace}")
-set(CMAKE_CXX_FLAGS_VALGRIND  "-O0 -g3 -DLINUX -DX86_64 ${flags_enable_pt_memtrace}")
-set(CMAKE_C_FLAGS_GPROF       "${CMAKE_CXX_FLAGS_SCARABOPT} -pg -g3 ${flags_enable_pt_memtrace}")
-set(CMAKE_CXX_FLAGS_GPROF     "${CMAKE_CXX_FLAGS_SCARABOPT} -pg -g3 ${flags_enable_pt_memtrace}")
-set(CMAKE_C_FLAGS_DEBUG       "-O0 -g3 -DLINUX -DX86_64 -fsanitize=address -fsanitize-address-use-after-scope ${flags_enable_pt_memtrace}")
-set(CMAKE_CXX_FLAGS_DEBUG     "-O0 -g3 -DLINUX -DX86_64 -fsanitize=address -fsanitize-address-use-after-scope ${flags_enable_pt_memtrace}")
+set(CMAKE_C_FLAGS_SCARABOPT "-O3 -g3 -DNO_DEBUG")
+set(CMAKE_CXX_FLAGS_SCARABOPT "-O3 -g3 -DNO_DEBUG")
+set(CMAKE_C_FLAGS_OPT_AVX "-O3 -g3 -march=haswell -DNO_DEBUG")
+set(CMAKE_CXX_FLAGS_OPT_AVX "-O3 -g3 -march=haswell -DNO_DEBUG")
+if(CMAKE_BUILD_TYPE STREQUAL "OPT_AVX" AND
+   NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|AMD64|amd64)$")
+  message(FATAL_ERROR "opt-avx requires an x86-64 host; use opt on ARM64")
+endif()
+set(CMAKE_C_FLAGS_VALGRIND "-O0 -g3")
+set(CMAKE_CXX_FLAGS_VALGRIND "-O0 -g3")
+set(CMAKE_C_FLAGS_GPROF "${CMAKE_C_FLAGS_SCARABOPT} -pg")
+set(CMAKE_CXX_FLAGS_GPROF "${CMAKE_CXX_FLAGS_SCARABOPT} -pg")
+set(CMAKE_C_FLAGS_DEBUG "-O0 -g3 -fsanitize=address -fsanitize-address-use-after-scope")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -fsanitize=address -fsanitize-address-use-after-scope")
 
 # Default ASan runtime options (embedded; ASAN_OPTIONS in the environment still overrides).
 set(SCARAB_ASAN_DEFAULT_OPTIONS
@@ -55,13 +58,29 @@ set(BUILD_DOCS OFF CACHE BOOL "Disable DynamoRIO doc generation" FORCE)
 #build dependencies with default warn flags, otherwise dynamorio will not build
 add_subdirectory(deps)
 
+add_compile_definitions(X86_64)
+if(APPLE)
+  add_compile_definitions(MACOS UNIX)
+else()
+  add_compile_definitions(LINUX UNIX)
+endif()
+if(SCARAB_ENABLE_PT_MEMTRACE)
+  add_compile_definitions(ENABLE_PT_MEMTRACE)
+endif()
+# ARM64 can fuse multiply/add by default, while the portable x86 build cannot.
+# Retain the same rounding at each operation for reproducible simulator metrics.
+add_compile_options(-ffp-contract=off)
+
 set(warn_flags -Wall -Wunused -Wno-long-long
   -Wpointer-arith
   -Werror)
 set(warn_c_flags ${warn_flags}
   -Wmissing-declarations
   -Wmissing-prototypes
-  -Wimplicit -Wno-unused-but-set-variable -Wno-maybe-uninitialized)
+  -Wimplicit -Wno-unused-but-set-variable)
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  list(APPEND warn_c_flags -Wno-maybe-uninitialized)
+endif()
 set(warn_cxx_flags ${warn_flags})
 
 add_compile_options(
@@ -71,10 +90,16 @@ add_compile_options(
 
 add_subdirectory(ramulator)
 add_subdirectory(pin/pin_lib)
+if(PIN_EXEC_TESTS)
+  if(APPLE)
+    message(FATAL_ERROR "PIN_EXEC_TESTS requires the Intel Pin x86 Linux runtime")
+  endif()
+  enable_language(ASM)
+endif()
 add_subdirectory(pin/pin_exec/testing)
 
 set(scarab_dirs bp debug bp/template_lib dvfs frontend globals isa libs memory power prefetcher confidence .)
-if(DEFINED ENV{SCARAB_ENABLE_PT_MEMTRACE})
+if(SCARAB_ENABLE_PT_MEMTRACE)
   set(scarab_dirs ${scarab_dirs} frontend/pt_memtrace)
 endif()
 
@@ -96,15 +121,31 @@ target_sources(scarab PRIVATE
   $<$<CONFIG:Debug>:${CMAKE_CURRENT_BINARY_DIR}/asan_default_options.cc>
 )
 
-target_include_directories(scarab PRIVATE .)
+find_package(Git QUIET)
+add_custom_target(scarab_gitrev
+  COMMAND ${CMAKE_COMMAND}
+    -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
+    -DSCARAB_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+    -DSCARAB_GITREV_FILE=${CMAKE_CURRENT_BINARY_DIR}/gitrev
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/support/write_gitrev.cmake
+  BYPRODUCTS ${CMAKE_CURRENT_BINARY_DIR}/gitrev
+  VERBATIM)
+add_dependencies(scarab scarab_gitrev)
+target_include_directories(scarab PRIVATE ${CMAKE_CURRENT_BINARY_DIR} .)
+find_path(SCARAB_BOOST_INCLUDE_DIR boost/multi_index_container.hpp
+  HINTS /opt/homebrew/include)
+if(NOT SCARAB_BOOST_INCLUDE_DIR)
+  message(FATAL_ERROR "Scarab requires Boost headers (brew install boost on macOS)")
+endif()
+target_include_directories(scarab SYSTEM PRIVATE ${SCARAB_BOOST_INCLUDE_DIR})
 
 target_link_libraries(scarab
     PRIVATE
         ramulator
         pin_lib_for_scarab
 )
-if(DEFINED ENV{SCARAB_ENABLE_PT_MEMTRACE})
-  target_link_libraries(scarab PRIVATE dynamorio pt_memtrace)
+if(SCARAB_ENABLE_PT_MEMTRACE)
+  target_link_libraries(scarab PRIVATE pt_memtrace)
 endif()
 
 if(SCARAB_ENABLE_LTO)
